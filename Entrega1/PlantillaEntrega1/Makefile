@@ -1,6 +1,8 @@
 texfile = PlantillaEntrega1
 bibfile = Referencias.bib
 
+all: documento
+
 documento: $(texfile).tex $(bibfile)
 	pdflatex $(texfile).tex
 	bibtex $(texfile)

@@ -1,5 +1,6 @@
 \documentclass[letter, 10pt]{article}
-\usepackage[latin1]{inputenc}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
 \usepackage[spanish]{babel}
 \usepackage{amsfonts}
 \usepackage{amsmath}
@@ -10,14 +11,14 @@
 
 
 \begin{document}
-\title{Inteligencia Artificial \\ \begin{Large}Estado del Arte: Problema [Nombre Problema]\end{Large}}
-\author{[Nombre autor]}
+\title{Inteligencia Artificial \\ \begin{Large}Estado del Arte: Enhanced Profitable Tour Problem\end{Large}}
+\author{Miguel Huerta Flores}
 \date{\today}
 \maketitle
 
 
 %--------------------No borrar esta secci\'on--------------------------------%
-\section*{Evaluaci\'on}
+\section*{Evaluación}
 
 \begin{tabular}{ll}
 Resumen (5\%): & \underline{\hspace{2cm}} \\
@@ -38,17 +39,108 @@ Bibliograf\'ia (5\%): & \underline{\hspace{2cm}}\\
 Resumen del informe en no m\'as de 10 l\'ineas, donde se sintetice el problema que se trata y sirva para que un lector no involucrado comprenda el objetivo del documento.
 \end{abstract}
 
-\section{Introducci\'on}
-Una explicaci\'on breve del contenido del informe, es decir, detalla: Prop\'osito, Estructura del Documento, Descripci\'on (muy breve) del Problema y Motivaci\'on.
+\section{Introducción}
+En los últimos años han surgido diversas empresas y aplicaciones que se centran en definir la ruta más óptima (Reparto urbano,
+rutas turísticas, etc.) para maximizar la
+rentabilidad del negocio. El Enhanced Profitable Tour Problem (EPTP) es una generalización
+del Traveling Salesman Problem (TSP): no es necesario visitar todos los nodos, cada nodo tiene una valoración propia según el usuario
+y se busca maximizar el beneficio neto del recorrido teniendo en cuenta tanto las ganancias por visitar nodos como los arcos.
 
-\section{Definici\'on del Problema}
-Explicaci\'on del problema que se va a estudiar, en qu\'e consiste, cu\'ales son sus variables , restricciones y objetivo(s) de manera general (en palabras, no una formulaci\'on matem\'atica). Debe entenderse claramente el problema y qu\'e busca resolver.
-Explicar si existen problemas relacionados.
-Destacar, si existen, las variantes m\'as conocidas.\\
-Redactar en tercera persona, sin faltas de ortograf\'ia y referenciar correctamente sus fuentes mediante el comando  \verb+\cite{ }+. Por ejemplo, para hacer referencia al art\'iculo de algoritmos h\'ibridos para problemas de satisfacci\'on
- de restricciones~\cite{Prosser93Hybrid}.
+Este documento se divide en cuatro partes:
+\begin{itemize}
+  \item \textbf{Definición del problema:} Se explica con detalle en qué consiste el EPTP, cuáles son sus variables, restricciones y
+  objetivo(s). Además se presentan problemas relacionados y las variantes más conocidas.
+  \item \textbf{Estado del arte:} Se detallan los estudios previos relevantes, comparando métodos exactos, heurísticos y
+  metaheurísticos aplicados a variantes cercanas.
+  \item \textbf{Modelo matemático:} Se describe el modelo matemático propuesto/analizado, incluida la notación y las ecuaciones
+  principales.
+  \item \textbf{Conclusiones:} Se exponen las conclusiones principales extraídas del análisis y se sugieren líneas futuras de trabajo.
+\end{itemize}
+
+El propósito de este documento es profundizar en el problema EPTP, revisar trabajos relacionados y aportar ideas para mejorar la
+resolución del problema en contextos aplicados.
+
+
+\section{Definición del Problema}
+Sea un grafo dirigido $G = (V, A)$, donde $V$ representa un conjunto de $n$ nodos y $A$ un conjunto de $m$ arcos. El objetivo del
+problema consiste en seleccionar un subconjunto de nodos de manera que se maximice la valorización neta del recorrido. Tanto los
+nodos como los arcos tienen asociadas una valorización y un tiempo de uso —tiempo de servicio en los nodos y tiempo de viaje en los
+arcos— que dependen del usuario que realiza el tour.
+
+En esta versión del problema, además, cada nodo cuenta con una ventana de tiempo $[e_i, l_i]$, que indica el intervalo en el cual
+dicho nodo puede ser visitado.
+\\ \\
+Dado que el problema es una generalización del TSP, esto implica que es NP-Hard. Por lo tanto, 
+en la práctica resulta inviable resolver instancias de tamaño medio o grande mediante métodos exactos
+en tiempos computacionales razonables. Por esta razón, la literatura reciente se ha enfocado en el desarrollo 
+de enfoques aproximados, tales como multi-start hyperheuristic (MSHH), multi-start iterated local search (MS-ILS) y
+multi-start general variable neighborhood search (MS-GVNS) \cite{DASARI2021100897}. Estos métodos buscan obtener soluciones
+de alta calidad en tiempos reducidos, permitiendo abordar aplicaciones reales en ámbitos como la logística, 
+la planificación de rutas de servicio y la gestión del transporte.
+
+\textbf{Restricciones del problema}:
+\begin{itemize}
+    \item El tour comienza y termina en el nodo 1
+    \item El tour consiste en un subconjunto de nodos
+    \item Cada nodo del tour es visitado a lo más una vez
+    \item Todos los usuarios comienzan en un tiempo inicial $t = 0$.
+    \item La duración total del recorrido no debe exceder el tiempo total de cada usuario
+    \item Cada nodo $i$ sólo puede visitarse dentro de su ventana de tiempo [$e_i$, $l_i$].
+    \item Si se arriba antes de $e_i$, se espera; si se arriba después de $l_i$, el nodo no puede visitarse.
+\end{itemize}
+
+\textbf{Variantes mas conocidas}:
+\begin{itemize}
+  \item \textbf{Profitable Tour Problem Clásico}: Se combinan beneficios por visitar nodos y los costos por visitar nodos. Maximizando el
+  beneficio neto. \cite{DASARI2021100897}
+  \item \textbf{Orienteering Problem (OP)}: Se busca pasar por nodos (no necesariamente todos) con ``premios'' para maximizar ganancias, 
+  dentro de un limite de tiempo. \cite{5668224}
+  \item \textbf{Team Orienteering Problem (TOP)}: Se busca encontrar rutas para multiples vehiculos en un grafo, tal que,
+  el profit de la suma de los nodos sea maximizado, sujeto al costo de que conlleva cada vehiculo. \cite{9155343}
+  \item \textbf{Prize-Collecting TSP (PCTSP)}: Generalizacion del TSP. Al visitar un nodo, se recolecta un ``premio'' y por cada
+  nodo no visitado, se penaliza. El objetivo es minimizar la suma de los costos de viaje y las penalizaciones, incluyendo en
+  el tour, un numero suficiente de nodos para recolectar un ``premio'' minimo. \cite{1587725}
+\end{itemize}
 
 \section{Estado del Arte}
+
+\subsection{Origen histórico del problema}
+El problema de enrutamiento tiene su base en el conocido Traveling Salesman Problem (TSP).
+La formulación clásica del TSP es rígida, ya que impone la visita obligatoria a todos los nodos de una instancia. Si
+bien esto es válido para muchos contextos teóricos, en la práctica logística esta premisa puede llevar a soluciones ineficientes y
+poco rentables. Surgen, por ejemplo, situaciones en las que el costo de viajar hasta un cliente remoto supera el beneficio de atenderlo,
+o donde sus restrictivas ventanas de tiempo hacen inviable su inclusión en una ruta cohesiva.
+
+Esta limitación de los modelos clásicos motivó el desarrollo de variantes más flexibles y realistas. Una de las más relevantes es
+el Profitable Tour Problem (PTP), que introduce un cambio de paradigma fundamental: no es obligatorio visitar todos los clientes.
+En su lugar, el PTP busca maximizar la utilidad neta de la ruta, definida como la diferencia entre la suma de los beneficios (o premios)
+obtenidos al visitar clientes y el costo total del recorrido.
+
+El Enhanced Profitable Tour Problem (EPTP) surge entonces como una evolución natural del PTP, incorporando restricciones operativas
+críticas del mundo real (como ventanas de tiempo y tiempos de servicio) que condicionan la viabilidad y
+rentabilidad del tour. Así, el EPTP no solo decide de forma óptima a qué clientes visitar, sino también en qué orden hacerlo,
+respetando las restricciones que modelan el contexto operativo.
+
+\subsection{Enfoques y técnicas utilizadas}
+\subsubsection{Métodos exactos}
+
+\subsubsection{Heurísticas}
+\subsubsection{Metaheurísticas}
+\subsubsection{Métodos híbridos}
+\subsubsection{Técnicas emergentes}
+
+
+\subsection{Representaciones del problema}
+
+
+\subsection{Resultados obtenidos}
+
+
+\subsection{Tendencias actuales}
+
+
+
+
 La informaci\'on que describen en este punto se basa en los estudios realizados con antelaci\'on respecto al tema.
 Lo m\'as importante que se ha hecho hasta ahora con relaci\'on al problema. Deber\'ia responder preguntas como las siguientes:
 ?`cu\'ando surge?, ?`qu\'e m\'etodos se han usado para resolverlo?, ?`cu\'ales son los mejores algoritmos que se han creado hasta
