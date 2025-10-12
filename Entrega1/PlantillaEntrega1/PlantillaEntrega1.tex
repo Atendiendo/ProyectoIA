@@ -122,42 +122,116 @@ rentabilidad del tour. Así, el EPTP no solo decide de forma óptima a qué clie
 respetando las restricciones que modelan el contexto operativo.
 
 \subsection{Enfoques y técnicas utilizadas}
+
 \subsubsection{Métodos exactos}
+Este enfoque es presentado por \cite{LERAROMERO2021879}, quienes abordan el Problema de
+time-dependent profitable tour problem with resource constraints (TDPTPRC). En este trabajo, los autores
+desarrollan un algoritmo de Branch and Cut específicamente diseñado para este problema, que generaliza el Problema de la Ruta
+Rentable (PTP) al incorporar tiempos de viaje variables para modelar la congestión vial. Proponen una formulación de
+programación lineal entera mixta (MILP) que, explotando la estructura de la función de tiempo de viaje,
+reducen significativamente el número de variables y restricciones.
 
 \subsubsection{Heurísticas}
+En este contexto, \cite{1587725} propone dos algoritmos híbridos para resolver el Prize collecting travelling salesman problem
+(PCTSP): el Evolutionary Clustering Search (ECS) y una adaptacion de este llamado *CS. Estos métodos se basan en una estrategia de
+clustering de búsqueda para detectar áreas prometedoras del espacio de soluciones y luego aplicar métodos de búsqueda local para
+refinarlas.
+
+Por otro lado, \cite{9155343} aborda el Team orienteering problem (TOP), proponiendo
+algoritmos de aproximación con ratios teóricos garantizados. Los autores desarrollan un algoritmo greedy con un
+ratio de aproximación de $(1-(1/e)^{1/(2 + \epsilon)})$ para el caso general, y un algoritmo mejorado para el
+caso especial donde todos los vehículos son del mismo tipo. Las evaluaciones experimentales muestran que sus algoritmos
+superan en un 12.5\% a 17.5\% a los enfoques existentes en términos de profit obtenido.
+
+Y por último, \cite{DASARI2021100897} se centra en el Profitable Tour Problem (PTP), proponiendo tres métodos: multi-start
+hyper-heuristic (MSHH), multi-start iterated local search (MS-ILS) and multi-start general variable neighborhood search (MS-GVNS).
+La hyper-heurística MSHH utiliza ocho heurísticas de bajo nivel (como adición, eliminación, intercambio y 2-opt) y dos mecanismos
+de selección: aleatorio (MSHH\_RAND) y greedy (MSHH\_GREEDY). Los experimentos en 77 instancias basadas en TSPLIB muestran que
+MSHH\_RAND y MSHH\_GREEDY superan consistentemente a MS-ILS y MS-GVNS en la mayoría de los casos, tanto en calidad de solución best
+como average, con MSHH\_RAND siendo el método más efectivo en general, especialmente bajo criterios de tiempo corto.
+
 \subsubsection{Metaheurísticas}
+Por el lado de las Metaheurísticas, \cite{5668224} propone un algoritmo de Modified Variable Neighborhood Search (MVNS) para resolver el
+Orienteering Problem (OP). A diferencia de los métodos clásicos de Variable Neighborhood Search (VNS), el MVNS divide el espacio de
+búsqueda en sub-regiones según los niveles de restricción. Durante la búsqueda, selecciona una solución base de una lista de candidatos
+que contiene una solución por cada nivel de restricción, y las soluciones vecinas encontradas se comparan y actualizan globalmente
+en dicha lista. El algoritmo incorpora dos tipos de procedimientos de vecindad: path improvement (intercambio, 2-opt e inserción,
+tanto intra-ruta como inter-rutas) y score improvement (reemplazo e inserción de nodos no visitados). Además,
+utiliza una fase de perturbación para diversificar la búsqueda. En pruebas con 67 instancias benchmark, MVNS obtuvo
+65 de las mejores soluciones conocidas, demostrando ser robusto y eficiente en comparación con otros métodos como ACO-OP, VNS y NACO-OP.
+
+Por otro lado, \cite{6552660} aborda el Rich Profitable Tour Problem (RPTP). Los autores proponen un
+algoritmo híbrido que combina Variable Neighborhood Search con Adaptive Large Neighborhood Search (VNS/ALNS). Este método
+utiliza una fase de perturbación basada en el paradigma Ruin and Recreate, que destruye parcialmente la solución y luego la
+repara mediante heurísticas adaptativas de inserción y eliminación. La fase de mejora emplea una búsqueda local que reinserta
+clientes no visitados. Cuando se evalúa en instancias del Orienteering Problem with Time Windows (OPTW), el algoritmo VNS/ALNS
+obtiene soluciones óptimas o casi óptimas en 57 de 58 instancias, superando en rendimiento a métodos como ILS, GRASP/ELS y GVNS.
+
 \subsubsection{Métodos híbridos}
+En el contexto de sistemas de información turística, \cite{article} propone un marco híbrido para resolver el Enhanced Profitable
+Tour Problem (EPTP). Este enfoque combina técnicas de reducción de grafos, construcción inicial de rutas y mejora iterativa
+mediante un algoritmo único de Extensión/Colapso. Primero, el grafo original de la red vial se reduce conservando solo los nodos de
+interés y calculando caminos óptimos entre ellos mediante un algoritmo de Dijkstra modificado que considera preferencias del usuario.
+Luego, se genera una solución inicial factible insertando nodos de manera iterativa según un criterio de ganancia por unidad de tiempo.
+Finalmente, la fase de mejora alterna entre una Fase de Extensión, que añade nodos prometedores al tour, y una Fase de Colapso, que
+elimina nodos para mantener la factibilidad respecto al tiempo máximo. Este enfoque híbrido logra soluciones de alta calidad
+(más del 90\% del óptimo en comparación con branch and bound) en tiempos computacionales razonables (3.7 segundos para un tour de 8
+horas), siendo adecuado para aplicaciones en tiempo real.
+
+En un enfoque más reciente, \cite{HE2025107077} introduce el Capacitated Profitable Tour Problem with Cross-Docking (CPTPC),
+un problema de enrutamiento de dos niveles donde empresas logísticas seleccionan solicitudes de transporte rentables desde plataformas
+industriales y utilizan un cross-dock para consolidar envíos. Los autores desarrollan un Hybrid Genetic Algorithm (HGA) que incorpora un
+operador de cruce de dos niveles EAX² para combinar rutas de recogida y entrega de soluciones parentales, manteniendo bloques prometedores.
+El algoritmo también incluye una búsqueda local con once operadores de vecindad (M1-M11) y una técnica de cálculo optimizada que utiliza
+colas de prioridad para evaluar inserciones de nodos de entrega de manera eficiente. Las pruebas en instancias reales de 36 solicitudes
+muestran que HGA mejora los beneficios entre un 59.74\% y un 124.31\% respecto a métodos manuales, demostrando su utilidad práctica
+para la logística basada en plataformas digitales.
+
 \subsubsection{Técnicas emergentes}
-
-
-\subsection{Representaciones del problema}
-
+Finalmente, \cite{9989933} aborda el Online Stochastic Profitable Tour Problem
+(OS-PTP), una variante del TSP con beneficios donde las ganancias de los clientes se modelan mediante variables aleatorias dependientes
+del tiempo cuyas realizaciones se revelan de forma incremental. Los autores proponen un algoritmo de Deep Reinforcement Learning (DRL)
+basado en AlphaZero, que combina una red neuronal convolucional con una búsqueda en árbol de Monte Carlo (MCTS). La red neuronal
+procesa matrices de entrada que representan la posición actual del agente, los beneficios esperados y el tiempo restante, generando
+dos salidas: un valor de estado (value-head) que estima la ganancia futura esperada y una distribución de probabilidad (policy-head)
+sobre los próximos clientes a visitar. Durante la fase en línea, el MCTS guiado por la red, explora iterativamente los movimientos más
+prometedores mediante una función UCT que balancea exploración y explotación. El entrenamiento se realiza mediante auto-juego en
+1,000 escenarios de cada instancia, actualizando la red con los datos generados por el MCTS. En pruebas con instancias de 10 a 50
+clientes, el algoritmo mejora progresivamente su rendimiento, alcanzando hasta un 97\% del óptimo de referencia tras 4 días de
+entrenamiento. Este enfoque representa un avance significativo en la aplicación de DRL a problemas de enrutamiento estocásticos,
+eliminando la necesidad de diseñar heurísticas manuales y adaptándose dinámicamente a la incertidumbre en la demanda.
 
 \subsection{Resultados obtenidos}
+Si bien la revisión abarca una gama de problemas relacionados (PTP, OP, TOP), el análisis comparativo se orienta a identificar las
+técnicas más adecuadas para abordar el Enhanced Profitable Tour Problem (EPTP), el cual se caracteriza por la selección óptima de
+clientes, la maximización de la utilidad y, críticamente, la incorporación de restricciones operativas realistas como ventanas de tiempo.
 
+Desde esta perspectiva, los métodos exactos \cite{LERAROMERO2021879} quedan descartados para instancias realistas de EPTP debido a su
+alta complejidad computacional. La introducción de ventanas de tiempo y otros recursos hace que el espacio de búsqueda sea demasiado
+grande para que estos métodos sean viables en aplicaciones prácticas, aunque siguen siendo valiosos para obtener soluciones de referencia
+en instancias pequeñas.
 
-\subsection{Tendencias actuales}
+Entre las metodologías aproximadas, las metaheurísticas y heurísticas avanzadas demuestran ser las más robustas. En particular,
+los enfoques híbridos que combinan diferentes estrategias de búsqueda son los que mejor se adaptan a la naturaleza combinatoria y
+fuertemente restringida del EPTP. El algoritmo MVNS de \cite{5668224} y el VNS/ALNS de \cite{6552660}, ambos probados en problemas
+con ventanas de tiempo (OPTW), son ejemplos destacados. Su éxito radica en la capacidad de equilibrar una búsqueda local intensiva
+(para explotar soluciones prometedoras) con mecanismos de diversificación efectivos, para escapar de óptimos locales.
 
+Por otro lado, las técnicas emergentes como el DRL \cite{9989933} si bien son extremadamente prometedoras para entornos dinámicos y
+estocásticos (una posible extensión futura del EPTP), actualmente presentan una barrera de entrada alta por su costo de entrenamiento
+y complejidad de implementación. Para el EPTP en su formulación estática y determinística, las metaheurísticas híbridas consolidadas
+ofrecen una mejor relación costo-beneficio.
 
-
-
-La informaci\'on que describen en este punto se basa en los estudios realizados con antelaci\'on respecto al tema.
-Lo m\'as importante que se ha hecho hasta ahora con relaci\'on al problema. Deber\'ia responder preguntas como las siguientes:
-?`cu\'ando surge?, ?`qu\'e m\'etodos se han usado para resolverlo?, ?`cu\'ales son los mejores algoritmos que se han creado hasta
-la fecha?, ?`qu\'e representaciones han tenido los mejores resultados?, ?`cu\'al es la tendencia actual para resolver el problema?, tipos de movimientos, heur\'isticas, m\'etodos completos, tendencias, etc... Puede incluir gr\'aficos comparativos o explicativos.\\
-
-
-
-\section{Modelo Matem\'atico}
+\section{Modelo Matemático}
 Uno o m\'as modelos matem\'aticos para el problema, idealmente indicando el espacio de b\'usqueda para cada uno. Cada modelo debe estar correctamente referenciado, adem\'as no debe ser una imagen extraida. Tambi\'en deben explicarse en detalle cada una de las partes, mostrando claramente la funci\'on a maximizar/minimizar, variables y restricciones. Tanto las f\'ormulas como las explicaciones deben ser consistentes.
 
 \section{Conclusiones}
-Conclusiones RELEVANTES del estudio realizado. Deber\'ia responder a las preguntas: ?`todas las t\'ecnicas resuelven el mismo problema o hay algunas diferencias?, ?`En qu\'e se parecen o difieren las t\'ecnicas en el contexto del problema?, ?`qu\'e limitaciones tienen?, ?`qu\'e t\'ecnicas o estrategias son las m\'as prometedoras?, ?`existe trabajo futuro por realizar?, ?`qu\'e ideas usted propone como lineamientos para continuar con investigaciones futuras?
+La evidencia sugiere que los enfoques híbridos y las metaheurísticas avanzadas (especialmente VNS/ALNS y
+estrategias similares) son los más adecuados para resolver el EPTP de manera efectiva. Su flexibilidad para incorporar múltiples
+restricciones, su capacidad para escapar de óptimos locales y su eficiencia computacional relativa las hacen superiores. El método de
+\cite{article} es una prueba concreta de este éxito en el EPTP, mientras que los resultados de \cite{6552660} en el OPTW (un
+problema muy similar en espíritu al EPTP) lo corroboran.
 
-%------Esta sección puede ser removida ----------%
-\section{Bibliograf\'ia}
-Indicando toda la informaci\'on necesaria de acuerdo al tipo de documento revisado. Todas las referencias deben ser citadas en el documento.
-%------Remover hasta acá ----------%
 \bibliographystyle{plain}
 \bibliography{Referencias}
 
