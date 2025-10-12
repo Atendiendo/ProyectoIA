@@ -36,8 +36,14 @@ Bibliograf\'ia (5\%): & \underline{\hspace{2cm}}\\
 
 
 \begin{abstract}
-Resumen del informe en no m\'as de 10 l\'ineas, donde se sintetice el problema que se trata y sirva para que un lector no involucrado comprenda el objetivo del documento.
+El presente informe analiza el Enhanced Profitable Tour Problem (EPTP), una generalización del Traveling Salesman Problem en la que no
+es obligatorio visitar todos los nodos y cada nodo y arco posee una valorización propia. Se describen sus restricciones operativas,
+como ventanas de tiempo y tiempos de servicio, y se presentan las variantes más relevantes. Se realiza una revisión del estado del
+arte, comparando métodos exactos, heurísticos, metaheurísticos, híbridos y técnicas emergentes aplicadas a problemas relacionados.
+Finalmente, se propone un modelo matemático que formaliza el problema y se discuten las metodologías más efectivas para su resolución,
+destacando los enfoques híbridos y metaheurísticos por su eficiencia y adaptabilidad a escenarios reales.
 \end{abstract}
+
 
 \section{Introducción}
 En los últimos años han surgido diversas empresas y aplicaciones que se centran en definir la ruta más óptima (Reparto urbano,
@@ -50,15 +56,15 @@ Este documento se divide en cuatro partes:
 \begin{itemize}
   \item \textbf{Definición del problema:} Se explica con detalle en qué consiste el EPTP, cuáles son sus variables, restricciones y
   objetivo(s). Además se presentan problemas relacionados y las variantes más conocidas.
-  \item \textbf{Estado del arte:} Se detallan los estudios previos relevantes, comparando métodos exactos, heurísticos y
-  metaheurísticos aplicados a variantes cercanas.
+  \item \textbf{Estado del arte:} Se detallan los estudios previos relevantes, comparando métodos exactos, heurísticos,
+  metaheurísticos, hibridos (completos e incompletos) y técnicas emergentes aplicados a variantes cercanas.
   \item \textbf{Modelo matemático:} Se describe el modelo matemático propuesto/analizado, incluida la notación y las ecuaciones
   principales.
   \item \textbf{Conclusiones:} Se exponen las conclusiones principales extraídas del análisis y se sugieren líneas futuras de trabajo.
 \end{itemize}
 
-El propósito de este documento es profundizar en el problema EPTP, revisar trabajos relacionados y aportar ideas para mejorar la
-resolución del problema en contextos aplicados.
+El propósito de este documento es profundizar en el problema EPTP, revisar trabajos relacionados y analizarlos
+para asi intentar determinar la mejor forma de resolver este problema.
 
 
 \section{Definición del Problema}
@@ -69,12 +75,11 @@ arcos— que dependen del usuario que realiza el tour.
 
 En esta versión del problema, además, cada nodo cuenta con una ventana de tiempo $[e_i, l_i]$, que indica el intervalo en el cual
 dicho nodo puede ser visitado.
-\\ \\
+
 Dado que el problema es una generalización del TSP, esto implica que es NP-Hard. Por lo tanto, 
 en la práctica resulta inviable resolver instancias de tamaño medio o grande mediante métodos exactos
 en tiempos computacionales razonables. Por esta razón, la literatura reciente se ha enfocado en el desarrollo 
-de enfoques aproximados, tales como multi-start hyperheuristic (MSHH), multi-start iterated local search (MS-ILS) y
-multi-start general variable neighborhood search (MS-GVNS) \cite{DASARI2021100897}. Estos métodos buscan obtener soluciones
+de enfoques aproximados. Estos métodos buscan obtener soluciones
 de alta calidad en tiempos reducidos, permitiendo abordar aplicaciones reales en ámbitos como la logística, 
 la planificación de rutas de servicio y la gestión del transporte.
 
@@ -126,8 +131,8 @@ respetando las restricciones que modelan el contexto operativo.
 \subsubsection{Métodos exactos}
 Este enfoque es presentado por \cite{LERAROMERO2021879}, quienes abordan el Problema de
 time-dependent profitable tour problem with resource constraints (TDPTPRC). En este trabajo, los autores
-desarrollan un algoritmo de Branch and Cut específicamente diseñado para este problema, que generaliza el Problema de la Ruta
-Rentable (PTP) al incorporar tiempos de viaje variables para modelar la congestión vial. Proponen una formulación de
+desarrollan un algoritmo de Branch and Cut específicamente diseñado para este problema, que generaliza el Profitable Tour
+Problem (PTP) al incorporar tiempos de viaje variables para modelar la congestión vial. Proponen una formulación de
 programación lineal entera mixta (MILP) que, explotando la estructura de la función de tiempo de viaje,
 reducen significativamente el número de variables y restricciones.
 
@@ -223,14 +228,104 @@ y complejidad de implementación. Para el EPTP en su formulación estática y de
 ofrecen una mejor relación costo-beneficio.
 
 \section{Modelo Matemático}
-Uno o m\'as modelos matem\'aticos para el problema, idealmente indicando el espacio de b\'usqueda para cada uno. Cada modelo debe estar correctamente referenciado, adem\'as no debe ser una imagen extraida. Tambi\'en deben explicarse en detalle cada una de las partes, mostrando claramente la funci\'on a maximizar/minimizar, variables y restricciones. Tanto las f\'ormulas como las explicaciones deben ser consistentes.
+El siguiente modelo matematico fue creado usando \cite{article} y el documento entregado por el ayudante asociado a mi problema Marcel
+Silva.
+
+Dado un grafo dirigido $G = (V, A)$ donde $V$ es un conjunto de $n$ nodos, y $A$ es un conjunto de $m$ arcos, considerando solo
+1 usuario por instancia:
+
+\subsection{Parámetros y constantes}
+\begin{itemize}
+  \item $V = \{1, 2, . . . , n\}$: conjunto de nodos.
+  \item $A \subseteq V$ x $V$: conjunto de arcos dirigidos.
+  \item $t_i$: tiempo de servicio en el nodo $i$. $i \in V$.
+  \item $d_{ij}$ : tiempo de viaje asociado al arco ($i$, $j$) $\in A$.
+  \item $T$: tiempo total del usuario.
+  \item $c_{ij}$: valorización del arco ($i$, $j$) que le da el usuario. $i$, $j \in V$
+  \item $s_i$: valorización del nodo $i$ que le da el usuario. $i \in V$
+  \item $[e_i, l_i]$: ventana de tiempo en la que el nodo $i$ está disponible. $i \in V$
+\end{itemize}
+
+\subsection{Variables}
+\begin{itemize}
+  \item $x_{ij} \in$ \{0, 1\}: variable que indica si el arco ($i$, $j$) es parte del tour.
+  \item $y_i \in$ \{0, 1\}: variable que indica si el nodo $i$ es visitado.
+\end{itemize}
+
+\subsection{Función Objetivo}
+
+\begin{equation}
+maximize \sum_{i \in V} s_i y_i + \sum_{i \in V}\sum_{j \in V \setminus \{i\}} c_{ij} x_{ij}
+\end{equation}
+
+(1) Representa la función objetivo, expresa la maximización de las valorizaciones de los arcos y los nodos por parte
+del usuario.
+
+\subsection{Restricciones}
+\begin{equation}
+\sum_{j \in V \setminus \{i\}} x_{ij} - y_i = 0, \quad \forall i \in V
+\end{equation}
+\begin{equation}
+\sum_{i \in V \setminus \{j\}} x_{ij} - y_j = 0, \quad \forall j \in V
+\end{equation}
+(2) y (3) se aseguran que los nodos solo tengan 1 arco de entrada y 1 arco de salida.
+
+\begin{equation}
+y_1 = 1
+\end{equation}
+En (4) por simplicidad se determina el nodo inicial fijo.
+
+\begin{equation}
+\sum_{i \in V}\sum_{j \in V \setminus \{i\}} d_{ij} x_{ij} + \sum_{i \in V} t_i y_i \leq T
+\end{equation}
+En (5) se asegura de que no se sobrepase el tiempo maximo del usuario.
+
+\begin{equation}
+\sum_{i \in S}\sum_{j \in V \setminus S} x_{ij} \geq y_h, \quad \forall S \subset V \quad : \quad 1 \in S, h \in V \setminus S
+\end{equation}
+La ecuacion (6) garantiza que el ciclo encontrado este conectado e incluya al nodo de inicio. La restricción asegura que si un nodo
+$h$ está incluido en el ciclo (es decir, $y_h = 1$), entonces debe existir al menos un arco que salga del conjunto $S$ y entre a
+$V \setminus S$. Esto conecta $h$ con el nodo 1, ya que $S$ siempre contiene al nodo 1. Junto con (2) y (3) se garantiza que solo exista
+un ciclo. Este se llama ``sub-tour elimination constraint''.
+
+\begin{equation}
+x_{ij} \in \{0, 1\}, \quad \forall (i,j) \in A
+\end{equation}
+\begin{equation}
+y_i \in \{0, 1\}, \quad \forall i \in V
+\end{equation}
+Finalmente en (7) y (8) se definen la naturaleza de las variables.
+
+\subsection{Espacio de búsqueda}
+La variable $y_i$ tiene espacio $2^n$, mientras que la variable $x_{ij}$ tiene espacio $2^{n^2}$,
+juntando ambas, el espacio total de este modelo es $2^{n + n^2}$ 
 
 \section{Conclusiones}
-La evidencia sugiere que los enfoques híbridos y las metaheurísticas avanzadas (especialmente VNS/ALNS y
-estrategias similares) son los más adecuados para resolver el EPTP de manera efectiva. Su flexibilidad para incorporar múltiples
-restricciones, su capacidad para escapar de óptimos locales y su eficiencia computacional relativa las hacen superiores. El método de
-\cite{article} es una prueba concreta de este éxito en el EPTP, mientras que los resultados de \cite{6552660} en el OPTW (un
-problema muy similar en espíritu al EPTP) lo corroboran.
+El análisis del estado del arte revela que, si bien existen diversas técnicas para problemas relacionados con el Enhanced
+Profitable Tour Problem (EPTP), no todas abordan exactamente el mismo problema. Las metodologías examinadas presentan tanto similitudes
+como diferencias fundamentales en su enfoque.
+
+Las técnicas existentes se asemejan en su objetivo común de maximizar la rentabilidad en problemas de enrutamiento selectivo, y en
+la necesidad de balancear la exploración y explotación del espacio de búsqueda. Particularmente, métodos como VNS/ALNS \cite{6552660}
+y el enfoque híbrido de \cite{article} comparten estrategias similares de búsqueda local adaptativa y mecanismos para mantener la
+factibilidad frente a restricciones operativas.
+
+También algoritmos como MVNS \cite{5668224} demuestran eficacia en problemas más simples como el OP, su adaptación al EPTP requeriría
+modificaciones sustanciales para incorporar la valorización de arcos y las complejas restricciones temporales.
+
+Entre las limitaciones identificadas destacan: la escalabilidad reducida de métodos exactos \cite{LERAROMERO2021879}, la dependencia
+de parámetros en metaheurísticas tradicionales, y el alto costo computacional de técnicas emergentes como DRL \cite{9989933}.
+
+Como trabajo futuro interesante, se propone desarrollar un algoritmo híbrido que combine la adaptabilidad de ALNS con mecanismos de
+aprendizaje automático para la selección automática de operadores. Específicamente, se sugiere incorporar:
+\begin{itemize}
+\item Estrategias de búsqueda adaptativa basadas en el estado actual de la solución
+\item Técnicas de poda inteligente que aprovechen la estructura del problema
+\end{itemize}
+
+Estas contribuciones potenciales podrían mejorar significativamente la resolución del EPTP al reducir los tiempos de convergencia y
+aumentar la calidad de las soluciones en instancias de gran escala, particularmente en contextos logísticos urbanos donde las
+restricciones temporales son críticas.
 
 \bibliographystyle{plain}
 \bibliography{Referencias}
