@@ -16,6 +16,5 @@ clean:
 	rm -f $(texfile).blg
 	rm -f $(texfile).log
 	rm -f $(texfile).out
-	rm -f $(texfile).pdf
 	rm -f $(texfile).tex.backup
 	rm -f $(bibfile).backup

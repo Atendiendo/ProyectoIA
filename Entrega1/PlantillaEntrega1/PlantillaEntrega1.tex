@@ -47,9 +47,13 @@ destacando los enfoques híbridos y metaheurísticos por su eficiencia y adaptab
 
 \section{Introducción}
 En los últimos años han surgido diversas empresas y aplicaciones que se centran en definir la ruta más óptima (Reparto urbano,
-rutas turísticas, etc.) para maximizar la
-rentabilidad del negocio. El Enhanced Profitable Tour Problem (EPTP) es una generalización
-del Traveling Salesman Problem (TSP): no es necesario visitar todos los nodos, cada nodo tiene una valoración propia según el usuario
+rutas turísticas, etc.) para maximizar la rentabilidad del negocio. Esta problemática de optimización es muy conocida y ha sido estudiada
+extensivamente.
+El problema mas clásico de enrutamiento es el Travelling Salesman Problem (TSP): el cual consiste en encontrar el camino más corto que
+visita todos los nodos de un conjunto (con sus respectivos arcos), comenzando y terminando en el mismo punto.
+
+El Enhanced Profitable Tour Problem (EPTP) es una generalización del
+TSP: no es necesario visitar todos los nodos, cada nodo tiene una valoración propia según el usuario
 y se busca maximizar el beneficio neto del recorrido teniendo en cuenta tanto las ganancias por visitar nodos como los arcos.
 
 Este documento se divide en cuatro partes:
@@ -68,10 +72,12 @@ para asi intentar determinar la mejor forma de resolver este problema.
 
 
 \section{Definición del Problema}
-Sea un grafo dirigido $G = (V, A)$, donde $V$ representa un conjunto de $n$ nodos y $A$ un conjunto de $m$ arcos. El objetivo del
-problema consiste en seleccionar un subconjunto de nodos de manera que se maximice la valorización neta del recorrido. Tanto los
+Sea un grafo dirigido $G = (V, A)$, donde $V$ representa un conjunto de $n$ nodos y $A$ un conjunto de $m$ arcos. Tanto los
 nodos como los arcos tienen asociadas una valorización y un tiempo de uso —tiempo de servicio en los nodos y tiempo de viaje en los
 arcos— que dependen del usuario que realiza el tour.
+El objetivo del EPTP consiste en seleccionar un subconjunto de nodos y arcos, de manera que se maximice la valorización neta del recorrido,
+el tiempo total del tour no debe exceder el tiempo maximo del usuario $T$. Se introducen las variables binarias $x_{ij} \in$ \{0, 1\} que
+indica si el arco ($i$, $j$) es parte del tour e $y_i \in$ \{0, 1\} que indica si el nodo $i$ es visitado. \cite{article}
 
 En esta versión del problema, además, cada nodo cuenta con una ventana de tiempo $[e_i, l_i]$, que indica el intervalo en el cual
 dicho nodo puede ser visitado.
@@ -111,6 +117,14 @@ la planificación de rutas de servicio y la gestión del transporte.
 
 \subsection{Origen histórico del problema}
 El problema de enrutamiento tiene su base en el conocido Traveling Salesman Problem (TSP).
+
+Unos de los primeros estudios sobre el TSP fue hecho en 1949 por Julia Robinson ``On the Hamiltonian Game (A Traveling Salesman Problem)''
+\cite{robinson1949hamiltonian} en el cual se presenta el objetivo del TSP como encontrar la ordenación cíclica de $n$
+puntos de manera que la suma de las distancias entre puntos consecutivos sea mínima, se indica que para un numero grande de puntos
+$n=50$, existen mas de $10^{62}$ caminos posibles, lo que hace imposible probarlos todos. Se propone un problema relacionado, en el cual
+se busca un sistema de circuitos ordenados que minimicen la longitud total. Se describe un método utilizando matrices y se da un ejemplo
+hecho ``a mano''. Cabe destacar que no se hace ningun analisis de tiempos o complejidades espaciales, solo se propone un método de resolución.
+
 La formulación clásica del TSP es rígida, ya que impone la visita obligatoria a todos los nodos de una instancia. Si
 bien esto es válido para muchos contextos teóricos, en la práctica logística esta premisa puede llevar a soluciones ineficientes y
 poco rentables. Surgen, por ejemplo, situaciones en las que el costo de viajar hasta un cliente remoto supera el beneficio de atenderlo,
@@ -119,7 +133,13 @@ o donde sus restrictivas ventanas de tiempo hacen inviable su inclusión en una 
 Esta limitación de los modelos clásicos motivó el desarrollo de variantes más flexibles y realistas. Una de las más relevantes es
 el Profitable Tour Problem (PTP), que introduce un cambio de paradigma fundamental: no es obligatorio visitar todos los clientes.
 En su lugar, el PTP busca maximizar la utilidad neta de la ruta, definida como la diferencia entre la suma de los beneficios (o premios)
-obtenidos al visitar clientes y el costo total del recorrido.
+obtenidos al visitar clientes y el costo total del recorrido. \cite{article}
+
+Las primeras definiciones del PTP provienen del survey hecho en 2005 ``Traveling Salesman Problems With Profits'' \cite{article2}, donde se clasifican
+los problemas de ruteo con ganancias. En este estudio, el Profitable Tour Problem (PTP) se define como el que busca determinar un
+tour que maximice el beneficio neto, es decir, la diferencia entre el "profit" total recolectado de los vértices visitados y
+el costo total de viaje. Este paper ha sido muy importante para el estudio de este problema, quedando reflejado por las mas de 600 citas
+que tiene.
 
 El Enhanced Profitable Tour Problem (EPTP) surge entonces como una evolución natural del PTP, incorporando restricciones operativas
 críticas del mundo real (como ventanas de tiempo y tiempos de servicio) que condicionan la viabilidad y
@@ -228,7 +248,7 @@ y complejidad de implementación. Para el EPTP en su formulación estática y de
 ofrecen una mejor relación costo-beneficio.
 
 \section{Modelo Matemático}
-El siguiente modelo matematico fue creado usando \cite{article} y el documento entregado por el ayudante asociado a mi problema Marcel
+El siguiente modelo matematico fue creado usando \cite{article} y el documento entregado por el ayudante asociado al problema Marcel
 Silva.
 
 Dado un grafo dirigido $G = (V, A)$ donde $V$ es un conjunto de $n$ nodos, y $A$ es un conjunto de $m$ arcos, considerando solo
@@ -303,12 +323,19 @@ juntando ambas, el espacio total de este modelo es $2^{n + n^2}$
 \section{Conclusiones}
 El análisis del estado del arte revela que, si bien existen diversas técnicas para problemas relacionados con el Enhanced
 Profitable Tour Problem (EPTP), no todas abordan exactamente el mismo problema. Las metodologías examinadas presentan tanto similitudes
-como diferencias fundamentales en su enfoque.
+como diferencias fundamentales en su enfoque, las cuales se presentan a continuacion.
 
-Las técnicas existentes se asemejan en su objetivo común de maximizar la rentabilidad en problemas de enrutamiento selectivo, y en
-la necesidad de balancear la exploración y explotación del espacio de búsqueda. Particularmente, métodos como VNS/ALNS \cite{6552660}
-y el enfoque híbrido de \cite{article} comparten estrategias similares de búsqueda local adaptativa y mecanismos para mantener la
-factibilidad frente a restricciones operativas.
+Las técnicas existentes se \textbf{asemejan} en su objetivo común de maximizar la rentabilidad en problemas de enrutamiento selectivo, y
+en la necesidad de balancear la exploración y explotación del espacio de búsqueda. Particularmente, métodos como VNS/ALNS \cite{6552660} y
+el enfoque híbrido de \cite{article} comparten estrategias similares de búsqueda local adaptativa y mecanismos para mantener la factibilidad
+frente a restricciones operativas.
+
+Sin embargo, las metodologías \textbf{difieren} crucialmente en su escalabilidad y su capacidad para manejar dichas restricciones
+operativas. Los métodos exactos \cite{LERAROMERO2021879} quedan limitados a instancias pequeñas debido a la complejidad NP-Hard,
+siendo inviables en escenarios reales. Las heurísticas simples priorizan la velocidad sobre la calidad y a menudo fallan al integrar
+adecuadamente las ventanas de tiempo (VT), generando soluciones infactibles o de bajo rendimiento, especialmente para problemas como
+el Orienteering Problem con VT (OPTW). En contraste, los enfoques híbridos (como VNS/ALNS) \cite{6552660} son los más adecuados, ya
+que combinan la potencia de búsqueda con mecanismos explícitos de reparación y mantenimiento de la factibilidad.
 
 También algoritmos como MVNS \cite{5668224} demuestran eficacia en problemas más simples como el OP, su adaptación al EPTP requeriría
 modificaciones sustanciales para incorporar la valorización de arcos y las complejas restricciones temporales.
