@@ -1,0 +1,352 @@
+\documentclass[letter, 10pt]{article}
+\usepackage[latin1]{inputenc}
+\usepackage[spanish]{babel}
+\usepackage{amsfonts}
+\usepackage{amsmath}
+\usepackage[dvips]{graphicx}
+\usepackage{url}
+\usepackage[top=3cm,bottom=3cm,left=3.5cm,right=3.5cm,footskip=1.5cm,headheight=1.5cm,headsep=.5cm,textheight=3cm]{geometry}
+
+
+\begin{document}
+\title{Inteligencia Artificial \\ \begin{Large}Informe Final: Problema [Nombre Problema]\end{Large}}
+\author{[Nombre autor]}
+\date{\today}
+\maketitle
+
+
+%--------------------No borrar esta secci\'on--------------------------------%
+\section*{Evaluaci\'on}
+
+\begin{tabular}{ll}
+C\'odigo Fuente (20\%): &  \underline{\hspace{2cm}}\\
+Resumen (2\%):  & \underline{\hspace{2cm}} \\
+Introducci\'on (3\%):  & \underline{\hspace{2cm}} \\
+Representaci\'on (10\%):  & \underline{\hspace{2cm}} \\
+Descripci\'on del algoritmo (20\%):  & \underline{\hspace{2cm}} \\
+Experimentos (10\%):  & \underline{\hspace{2cm}} \\
+Resultados (10\%):  & \underline{\hspace{2cm}} \\
+Conclusiones (20\%): &  \underline{\hspace{2cm}}\\
+Bibliograf\'ia (5\%): & \underline{\hspace{2cm}}\\
+ &  \\
+\textbf{Nota Final (100)}:   & \underline{\hspace{2cm}}
+\end{tabular}
+%---------------------------------------------------------------------------%
+
+\begin{abstract}
+Resumen del informe en no m\'as de 10 l\'ineas, donde se sintetice el problema que se trata, el acercamiento propuesto
+y sirva para que un lector no involucrado comprenda el objetivo del documento.
+\end{abstract}
+
+\section{Introducción}
+Una explicaci\'on breve del contenido del informe, es decir, detalla: Prop\'osito, Estructura del Documento, Descripci\'on (muy breve) del Problema y Motivaci\'on e ideas fundamentales de la propuesta de soluci\'on. Incluye la descripci\'on del contenido del Informe secci\'on por secci\'on.
+
+\section{Definición del Problema}
+Sea un grafo dirigido $G = (V, A)$, donde $V$ representa un conjunto de $n$ nodos y $A$ un conjunto de $m$ arcos. Tanto los
+nodos como los arcos tienen asociadas una valorización y un tiempo de uso —tiempo de servicio en los nodos y tiempo de viaje en los
+arcos— que dependen del usuario que realiza el tour.
+El objetivo del EPTP consiste en seleccionar un subconjunto de nodos y arcos, de manera que se maximice la valorización neta del recorrido,
+el tiempo total del tour no debe exceder el tiempo maximo del usuario $T$. Se introducen las variables binarias $x_{ij} \in$ \{0, 1\} que
+indica si el arco ($i$, $j$) es parte del tour e $y_i \in$ \{0, 1\} que indica si el nodo $i$ es visitado. \cite{article}
+
+En esta versión del problema, además, cada nodo cuenta con una ventana de tiempo $[e_i, l_i]$, que indica el intervalo en el cual
+dicho nodo puede ser visitado.
+
+Dado que el problema es una generalización del TSP, esto implica que es NP-Hard. Por lo tanto, 
+en la práctica resulta inviable resolver instancias de tamaño medio o grande mediante métodos exactos
+en tiempos computacionales razonables. Por esta razón, la literatura reciente se ha enfocado en el desarrollo 
+de enfoques aproximados. Estos métodos buscan obtener soluciones
+de alta calidad en tiempos reducidos, permitiendo abordar aplicaciones reales en ámbitos como la logística, 
+la planificación de rutas de servicio y la gestión del transporte.
+
+\textbf{Restricciones del problema}:
+\begin{itemize}
+    \item El tour comienza y termina en el nodo 1
+    \item El tour consiste en un subconjunto de nodos
+    \item Cada nodo del tour es visitado a lo más una vez
+    \item Todos los usuarios comienzan en un tiempo inicial $t = 0$.
+    \item La duración total del recorrido no debe exceder el tiempo total de cada usuario
+    \item Cada nodo $i$ sólo puede visitarse dentro de su ventana de tiempo [$e_i$, $l_i$].
+    \item Si se arriba antes de $e_i$, se espera; si se arriba después de $l_i$, el nodo no puede visitarse.
+\end{itemize}
+
+\textbf{Variantes mas conocidas}:
+\begin{itemize}
+  \item \textbf{Profitable Tour Problem Clásico}: Se combinan beneficios por visitar nodos y los costos por visitar nodos. Maximizando el
+  beneficio neto. \cite{DASARI2021100897}
+  \item \textbf{Orienteering Problem (OP)}: Se busca pasar por nodos (no necesariamente todos) con ``premios'' para maximizar ganancias, 
+  dentro de un limite de tiempo. \cite{5668224}
+  \item \textbf{Team Orienteering Problem (TOP)}: Se busca encontrar rutas para multiples vehiculos en un grafo, tal que,
+  el profit de la suma de los nodos sea maximizado, sujeto al costo de que conlleva cada vehiculo. \cite{9155343}
+  \item \textbf{Prize-Collecting TSP (PCTSP)}: Generalizacion del TSP. Al visitar un nodo, se recolecta un ``premio'' y por cada
+  nodo no visitado, se penaliza. El objetivo es minimizar la suma de los costos de viaje y las penalizaciones, incluyendo en
+  el tour, un numero suficiente de nodos para recolectar un ``premio'' minimo. \cite{1587725}
+\end{itemize}
+
+\section{Estado del Arte}
+
+\subsection{Origen histórico del problema}
+El problema de enrutamiento tiene su base en el conocido Traveling Salesman Problem (TSP).
+
+Unos de los primeros estudios sobre el TSP fue hecho en 1949 por Julia Robinson ``On the Hamiltonian Game (A Traveling Salesman Problem)''
+\cite{robinson1949hamiltonian} en el cual se presenta el objetivo del TSP como encontrar la ordenación cíclica de $n$
+puntos de manera que la suma de las distancias entre puntos consecutivos sea mínima, se indica que para un numero grande de puntos
+$n=50$, existen mas de $10^{62}$ caminos posibles, lo que hace imposible probarlos todos. Se propone un problema relacionado, en el cual
+se busca un sistema de circuitos ordenados que minimicen la longitud total. Se describe un método utilizando matrices y se da un ejemplo
+hecho ``a mano''. Cabe destacar que no se hace ningun analisis de tiempos o complejidades espaciales, solo se propone un método de resolución.
+
+La formulación clásica del TSP es rígida, ya que impone la visita obligatoria a todos los nodos de una instancia. Si
+bien esto es válido para muchos contextos teóricos, en la práctica logística esta premisa puede llevar a soluciones ineficientes y
+poco rentables. Surgen, por ejemplo, situaciones en las que el costo de viajar hasta un cliente remoto supera el beneficio de atenderlo,
+o donde sus restrictivas ventanas de tiempo hacen inviable su inclusión en una ruta cohesiva.
+
+Esta limitación de los modelos clásicos motivó el desarrollo de variantes más flexibles y realistas. Una de las más relevantes es
+el Profitable Tour Problem (PTP), que introduce un cambio de paradigma fundamental: no es obligatorio visitar todos los clientes.
+En su lugar, el PTP busca maximizar la utilidad neta de la ruta, definida como la diferencia entre la suma de los beneficios (o premios)
+obtenidos al visitar clientes y el costo total del recorrido. \cite{article}
+
+Las primeras definiciones del PTP provienen del survey hecho en 2005 ``Traveling Salesman Problems With Profits'' \cite{article2}, donde se clasifican
+los problemas de ruteo con ganancias. En este estudio, el Profitable Tour Problem (PTP) se define como el que busca determinar un
+tour que maximice el beneficio neto, es decir, la diferencia entre el "profit" total recolectado de los vértices visitados y
+el costo total de viaje. Este paper ha sido muy importante para el estudio de este problema, quedando reflejado por las mas de 600 citas
+que tiene.
+
+El Enhanced Profitable Tour Problem (EPTP) surge entonces como una evolución natural del PTP, incorporando restricciones operativas
+críticas del mundo real (como ventanas de tiempo y tiempos de servicio) que condicionan la viabilidad y
+rentabilidad del tour. Así, el EPTP no solo decide de forma óptima a qué clientes visitar, sino también en qué orden hacerlo,
+respetando las restricciones que modelan el contexto operativo.
+
+\subsection{Enfoques y técnicas utilizadas}
+
+\subsubsection{Métodos exactos}
+Este enfoque es presentado por \cite{LERAROMERO2021879}, quienes abordan el Problema de
+time-dependent profitable tour problem with resource constraints (TDPTPRC). En este trabajo, los autores
+desarrollan un algoritmo de Branch and Cut específicamente diseñado para este problema, que generaliza el Profitable Tour
+Problem (PTP) al incorporar tiempos de viaje variables para modelar la congestión vial. Proponen una formulación de
+programación lineal entera mixta (MILP) que, explotando la estructura de la función de tiempo de viaje,
+reducen significativamente el número de variables y restricciones.
+
+\subsubsection{Heurísticas}
+En este contexto, \cite{1587725} propone dos algoritmos híbridos para resolver el Prize collecting travelling salesman problem
+(PCTSP): el Evolutionary Clustering Search (ECS) y una adaptacion de este llamado *CS. Estos métodos se basan en una estrategia de
+clustering de búsqueda para detectar áreas prometedoras del espacio de soluciones y luego aplicar métodos de búsqueda local para
+refinarlas.
+
+Por otro lado, \cite{9155343} aborda el Team orienteering problem (TOP), proponiendo
+algoritmos de aproximación con ratios teóricos garantizados. Los autores desarrollan un algoritmo greedy con un
+ratio de aproximación de $(1-(1/e)^{1/(2 + \epsilon)})$ para el caso general, y un algoritmo mejorado para el
+caso especial donde todos los vehículos son del mismo tipo. Las evaluaciones experimentales muestran que sus algoritmos
+superan en un 12.5\% a 17.5\% a los enfoques existentes en términos de profit obtenido.
+
+Y por último, \cite{DASARI2021100897} se centra en el Profitable Tour Problem (PTP), proponiendo tres métodos: multi-start
+hyper-heuristic (MSHH), multi-start iterated local search (MS-ILS) and multi-start general variable neighborhood search (MS-GVNS).
+La hyper-heurística MSHH utiliza ocho heurísticas de bajo nivel (como adición, eliminación, intercambio y 2-opt) y dos mecanismos
+de selección: aleatorio (MSHH\_RAND) y greedy (MSHH\_GREEDY). Los experimentos en 77 instancias basadas en TSPLIB muestran que
+MSHH\_RAND y MSHH\_GREEDY superan consistentemente a MS-ILS y MS-GVNS en la mayoría de los casos, tanto en calidad de solución best
+como average, con MSHH\_RAND siendo el método más efectivo en general, especialmente bajo criterios de tiempo corto.
+
+\subsubsection{Metaheurísticas}
+Por el lado de las Metaheurísticas, \cite{5668224} propone un algoritmo de Modified Variable Neighborhood Search (MVNS) para resolver el
+Orienteering Problem (OP). A diferencia de los métodos clásicos de Variable Neighborhood Search (VNS), el MVNS divide el espacio de
+búsqueda en sub-regiones según los niveles de restricción. Durante la búsqueda, selecciona una solución base de una lista de candidatos
+que contiene una solución por cada nivel de restricción, y las soluciones vecinas encontradas se comparan y actualizan globalmente
+en dicha lista. El algoritmo incorpora dos tipos de procedimientos de vecindad: path improvement (intercambio, 2-opt e inserción,
+tanto intra-ruta como inter-rutas) y score improvement (reemplazo e inserción de nodos no visitados). Además,
+utiliza una fase de perturbación para diversificar la búsqueda. En pruebas con 67 instancias benchmark, MVNS obtuvo
+65 de las mejores soluciones conocidas, demostrando ser robusto y eficiente en comparación con otros métodos como ACO-OP, VNS y NACO-OP.
+
+Por otro lado, \cite{6552660} aborda el Rich Profitable Tour Problem (RPTP). Los autores proponen un
+algoritmo híbrido que combina Variable Neighborhood Search con Adaptive Large Neighborhood Search (VNS/ALNS). Este método
+utiliza una fase de perturbación basada en el paradigma Ruin and Recreate, que destruye parcialmente la solución y luego la
+repara mediante heurísticas adaptativas de inserción y eliminación. La fase de mejora emplea una búsqueda local que reinserta
+clientes no visitados. Cuando se evalúa en instancias del Orienteering Problem with Time Windows (OPTW), el algoritmo VNS/ALNS
+obtiene soluciones óptimas o casi óptimas en 57 de 58 instancias, superando en rendimiento a métodos como ILS, GRASP/ELS y GVNS.
+
+\subsubsection{Métodos híbridos}
+En el contexto de sistemas de información turística, \cite{article} propone un marco híbrido para resolver el Enhanced Profitable
+Tour Problem (EPTP). Este enfoque combina técnicas de reducción de grafos, construcción inicial de rutas y mejora iterativa
+mediante un algoritmo único de Extensión/Colapso. Primero, el grafo original de la red vial se reduce conservando solo los nodos de
+interés y calculando caminos óptimos entre ellos mediante un algoritmo de Dijkstra modificado que considera preferencias del usuario.
+Luego, se genera una solución inicial factible insertando nodos de manera iterativa según un criterio de ganancia por unidad de tiempo.
+Finalmente, la fase de mejora alterna entre una Fase de Extensión, que añade nodos prometedores al tour, y una Fase de Colapso, que
+elimina nodos para mantener la factibilidad respecto al tiempo máximo. Este enfoque híbrido logra soluciones de alta calidad
+(más del 90\% del óptimo en comparación con branch and bound) en tiempos computacionales razonables (3.7 segundos para un tour de 8
+horas), siendo adecuado para aplicaciones en tiempo real.
+
+En un enfoque más reciente, \cite{HE2025107077} introduce el Capacitated Profitable Tour Problem with Cross-Docking (CPTPC),
+un problema de enrutamiento de dos niveles donde empresas logísticas seleccionan solicitudes de transporte rentables desde plataformas
+industriales y utilizan un cross-dock para consolidar envíos. Los autores desarrollan un Hybrid Genetic Algorithm (HGA) que incorpora un
+operador de cruce de dos niveles EAX² para combinar rutas de recogida y entrega de soluciones parentales, manteniendo bloques prometedores.
+El algoritmo también incluye una búsqueda local con once operadores de vecindad (M1-M11) y una técnica de cálculo optimizada que utiliza
+colas de prioridad para evaluar inserciones de nodos de entrega de manera eficiente. Las pruebas en instancias reales de 36 solicitudes
+muestran que HGA mejora los beneficios entre un 59.74\% y un 124.31\% respecto a métodos manuales, demostrando su utilidad práctica
+para la logística basada en plataformas digitales.
+
+\subsubsection{Técnicas emergentes}
+Finalmente, \cite{9989933} aborda el Online Stochastic Profitable Tour Problem
+(OS-PTP), una variante del TSP con beneficios donde las ganancias de los clientes se modelan mediante variables aleatorias dependientes
+del tiempo cuyas realizaciones se revelan de forma incremental. Los autores proponen un algoritmo de Deep Reinforcement Learning (DRL)
+basado en AlphaZero, que combina una red neuronal convolucional con una búsqueda en árbol de Monte Carlo (MCTS). La red neuronal
+procesa matrices de entrada que representan la posición actual del agente, los beneficios esperados y el tiempo restante, generando
+dos salidas: un valor de estado (value-head) que estima la ganancia futura esperada y una distribución de probabilidad (policy-head)
+sobre los próximos clientes a visitar. Durante la fase en línea, el MCTS guiado por la red, explora iterativamente los movimientos más
+prometedores mediante una función UCT que balancea exploración y explotación. El entrenamiento se realiza mediante auto-juego en
+1,000 escenarios de cada instancia, actualizando la red con los datos generados por el MCTS. En pruebas con instancias de 10 a 50
+clientes, el algoritmo mejora progresivamente su rendimiento, alcanzando hasta un 97\% del óptimo de referencia tras 4 días de
+entrenamiento. Este enfoque representa un avance significativo en la aplicación de DRL a problemas de enrutamiento estocásticos,
+eliminando la necesidad de diseñar heurísticas manuales y adaptándose dinámicamente a la incertidumbre en la demanda.
+
+\subsection{Resultados obtenidos}
+Si bien la revisión abarca una gama de problemas relacionados (PTP, OP, TOP), el análisis comparativo se orienta a identificar las
+técnicas más adecuadas para abordar el Enhanced Profitable Tour Problem (EPTP), el cual se caracteriza por la selección óptima de
+clientes, la maximización de la utilidad y, críticamente, la incorporación de restricciones operativas realistas como ventanas de tiempo.
+
+Desde esta perspectiva, los métodos exactos \cite{LERAROMERO2021879} quedan descartados para instancias realistas de EPTP debido a su
+alta complejidad computacional. La introducción de ventanas de tiempo y otros recursos hace que el espacio de búsqueda sea demasiado
+grande para que estos métodos sean viables en aplicaciones prácticas, aunque siguen siendo valiosos para obtener soluciones de referencia
+en instancias pequeñas.
+
+Entre las metodologías aproximadas, las metaheurísticas y heurísticas avanzadas demuestran ser las más robustas. En particular,
+los enfoques híbridos que combinan diferentes estrategias de búsqueda son los que mejor se adaptan a la naturaleza combinatoria y
+fuertemente restringida del EPTP. El algoritmo MVNS de \cite{5668224} y el VNS/ALNS de \cite{6552660}, ambos probados en problemas
+con ventanas de tiempo (OPTW), son ejemplos destacados. Su éxito radica en la capacidad de equilibrar una búsqueda local intensiva
+(para explotar soluciones prometedoras) con mecanismos de diversificación efectivos, para escapar de óptimos locales.
+
+Por otro lado, las técnicas emergentes como el DRL \cite{9989933} si bien son extremadamente prometedoras para entornos dinámicos y
+estocásticos (una posible extensión futura del EPTP), actualmente presentan una barrera de entrada alta por su costo de entrenamiento
+y complejidad de implementación. Para el EPTP en su formulación estática y determinística, las metaheurísticas híbridas consolidadas
+ofrecen una mejor relación costo-beneficio.
+
+\section{Modelo Matemático}
+El siguiente modelo matematico fue creado usando \cite{article}, \cite{VANSTEENWEGEN20111} y el documento entregado por el ayudante asociado
+al problema Marcel Silva.
+
+Dado un grafo dirigido $G = (V, A)$ donde $V$ es un conjunto de $n$ nodos, y $A$ es un conjunto de $m$ arcos, considerando solo
+1 usuario por instancia:
+
+\subsection{Parámetros y constantes}
+\begin{itemize}
+  \item $V = \{1, 2, . . . , n\}$: conjunto de nodos.
+  \item $A \subseteq V$ x $V$: conjunto de arcos dirigidos.
+  \item $t_i$: tiempo de servicio en el nodo $i$. $i \in V$.
+  \item $d_{ij}$ : tiempo de viaje asociado al arco ($i$, $j$) $\in A$.
+  \item $T$: tiempo total del usuario.
+  \item $c_{ij}$: valorización del arco ($i$, $j$) que le da el usuario. $i$, $j \in V$
+  \item $s_i$: valorización del nodo $i$ que le da el usuario. $i \in V$
+  \item $[e_i, l_i]$: ventana de tiempo en la que el nodo $i$ está disponible. $i \in V$
+  \item $M$: una constante numerica muy grande.
+\end{itemize}
+
+\subsection{Variables}
+\begin{itemize}
+  \item $x_{ij} \in$ \{0, 1\}: variable que indica si el arco ($i$, $j$) es parte del tour.
+  \item $y_i \in$ \{0, 1\}: variable que indica si el nodo $i$ es visitado.
+  \item $w_i \geq 0$: variable continua que representa el tiempo de inicio del servicio en $i$.
+\end{itemize}
+
+\subsection{Función Objetivo}
+
+\begin{equation}
+maximize \sum_{i \in V} s_i y_i + \sum_{i \in V}\sum_{j \in V \setminus \{i\}} c_{ij} x_{ij}
+\end{equation}
+
+(1) Representa la función objetivo, expresa la maximización de las valorizaciones de los arcos y los nodos por parte
+del usuario.
+
+\subsection{Restricciones}
+\begin{equation}
+\sum_{j \in V \setminus \{i\}} x_{ij} - y_i = 0, \quad \forall i \in V
+\end{equation}
+\begin{equation}
+\sum_{i \in V \setminus \{j\}} x_{ij} - y_j = 0, \quad \forall j \in V
+\end{equation}
+(2) y (3) se aseguran que los nodos solo tengan 1 arco de entrada y 1 arco de salida.
+
+\begin{equation}
+y_1 = 1
+\end{equation}
+\begin{equation}
+w_1 = 0
+\end{equation}
+
+En (4) por simplicidad se determina el nodo inicial fijo y en (5) se determina que el servicio en el nodo 1 comienza en el tiempo 0.
+
+\begin{equation}
+e_i y_i \leq w_i \leq l_i y_i, \quad \forall i \in V \setminus \{1\}
+\end{equation}
+En (6), se fuerza a que el tiempo de inicio del servicio este dentro de la ventana de tiempo [$e_i$, $l_i$] solo si el nodo es visitado.
+\begin{itemize}
+  \item si $y_i = 1$ (nodo $i$ es visitado) la restriccion se vuelve $e_i \leq w_i \leq l_i$ obligando a que $w_i$ se encuentre en el rango.
+  \item si $y_i = 0$ (nodo $i$ no es visitado) la restriccion se vuelve $0 \leq w_i \leq 0$ lo que fuerza $w_i = 0$.
+\end{itemize}
+
+\begin{equation}
+w_j \geq w_i + t_i + d_{ij} - M(1-x_{ij}), \quad \forall(i,j) \in A, j \neq 1
+\end{equation}
+En (7) nos aseguramos que $w_j$ se vaya actualizando correctamente:
+\begin{itemize}
+  \item si $x_{ij} = 1$ (se viaja de $i$ a $j$), la restriccion se vuelve $w_j \geq w_i + t_i + d_{ij}$, lo que nos asegura que el
+  servicio en $j$ ($w_j$) comience despues de llegar a $j$.
+  \item si $x_{ij} = 0$, la restriccion se vuelve $w_j \geq w_i + t_i + d_{ij} - M$ lo cual es un numero negativo muy grande y la restriccion
+  no se activa.
+\end{itemize}
+
+\begin{equation}
+w_i + t_i + d_{i1} \leq T + M(1-x_{i1}), \quad \forall i \in V \setminus \{1\}
+\end{equation}
+En (8) se asegura de que no se sobrepase el tiempo maximo del usuario.
+\begin{itemize}
+  \item si $x_{ij} = 1$ (el arco ($i$, 1) se usa, entonces $i$ el es el ultimo nodo), la restriccion se activa: $w_i + t_i + d_{i1} \leq T$
+  Esto se asegura que la vuelta al inicio (nodo 1) sea menor a $T$.
+  \item si $x_{ij} = 0$ (no se esta en el ultimo nodo), la restriccion queda $w_i + t_i + d_{i1} \leq T + M$ y la restriccion no se activa.
+\end{itemize}
+
+\begin{equation}
+x_{ij} \in \{0, 1\}, \quad \forall (i,j) \in A
+\end{equation}
+\begin{equation}
+y_i \in \{0, 1\}, \quad \forall i \in V
+\end{equation}
+\begin{equation}
+w_i \ge 0, \quad \forall i \in V
+\end{equation}
+Finalmente en (9), (10) y (11) se definen la naturaleza de las variables.
+
+\subsection{Espacio de búsqueda}
+La variable $y_i$ tiene espacio $2^n$, mientras que la variable $x_{ij}$ tiene espacio $2^{n^2}$,
+juntando ambas, el espacio total de este modelo es $2^{n + n^2}$
+
+Es importante notar que las variables continuas $w_i$ no incrementan este espacio de búsqueda 
+combinatorio; su rol es definir el dominio para la verificación de la factibilidad temporal 
+(ventanas de tiempo) dentro de cada combinación binaria generada por $x_{ij}$ e $y_i$.
+
+\section{Representación}
+Representaci\'on de \textbf{soluciones} (arreglos, matrices, etc.). En caso de t\'ecnicas completas indicar variables y dominios. Incluir justificaci\'on y ejemplos para mayor claridad.
+
+\section{Descripción del algoritmo}
+C\'omo fue implementada la soluci\'on. Interesa la implementaci\'on particular m\'as que el algoritmo gen\'erico, es decir, si se tiene que implementar SA, lo que se espera es que se explique en pseudoc\'odigo la estructura
+general y en p\'arrafos explicativos c\'omo fue implementada cada parte para su problema particular. Si
+se utilizan operadores/movimientos se debe justificar por qu\'e se utilizaron dichos operadores/movimientos. 
+En caso de una t\'ecnica completa, describir detalles relevantes del proceso, si se utiliza recursi\'on o no, explicar c\'omo se van construyendo soluciones, cu\'ando se revisan restricciones, c\'omo se registran conflictos, etc. En este punto no se espera que se incluya c\'odigo, eso va aparte.
+
+\section{Experimentos}
+Se necesita saber c\'omo experimentaron, c\'omo definieron par\'ametros, 
+c\'omo los fueron modificando, cu\'ales problemas/instancias se estudiaron y por qu\'e, etc. 
+Recuerde que las t\'ecnicas completas son deterministas y las t\'ecnicas incompletas son estoc\'asticas.
+
+\section{Resultados}
+Qu\'e fue lo que se logr\'o con la experimentaci\'on, incluir tablas y gr\'aficos (lo m\'as explicativos posible).
+Los resultados deben ser comentados y justificados en detalle en esta secci\'on.
+
+\section{Conclusiones}
+Conclusiones RELEVANTES del estudio realizado. Incluir conclusiones acerca de la adecuaci\'on de la propuesta de soluci\'on al problema que se busca resolver. Listar y analizar ventajas y desventajas de la propuesta en base a los resultados obtenidos y comportamiento de la propuesta en diferentes escenarios (problemas/instancias/par\'ametros). Incluir trabajo futuro en base a las conclusiones.
+
+%------Esta sección puede ser removida ----------%
+\section{Bibliograf\'ia}
+Indicando toda la informaci\'on necesaria de acuerdo al tipo de documento revisado. Todas las referencias deben ser citadas en el documento.
+%------Remover hasta acá ----------%
+
+\bibliographystyle{plain}
+\bibliography{Referencias}
+
+\end{document} 
