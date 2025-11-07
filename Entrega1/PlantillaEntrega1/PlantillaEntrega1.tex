@@ -248,8 +248,8 @@ y complejidad de implementación. Para el EPTP en su formulación estática y de
 ofrecen una mejor relación costo-beneficio.
 
 \section{Modelo Matemático}
-El siguiente modelo matematico fue creado usando \cite{article} y el documento entregado por el ayudante asociado al problema Marcel
-Silva.
+El siguiente modelo matematico fue creado usando \cite{article}, \cite{VANSTEENWEGEN20111} y el documento entregado por el ayudante asociado
+al problema Marcel Silva.
 
 Dado un grafo dirigido $G = (V, A)$ donde $V$ es un conjunto de $n$ nodos, y $A$ es un conjunto de $m$ arcos, considerando solo
 1 usuario por instancia:
@@ -264,12 +264,14 @@ Dado un grafo dirigido $G = (V, A)$ donde $V$ es un conjunto de $n$ nodos, y $A$
   \item $c_{ij}$: valorización del arco ($i$, $j$) que le da el usuario. $i$, $j \in V$
   \item $s_i$: valorización del nodo $i$ que le da el usuario. $i \in V$
   \item $[e_i, l_i]$: ventana de tiempo en la que el nodo $i$ está disponible. $i \in V$
+  \item $M$: una constante numerica muy grande.
 \end{itemize}
 
 \subsection{Variables}
 \begin{itemize}
   \item $x_{ij} \in$ \{0, 1\}: variable que indica si el arco ($i$, $j$) es parte del tour.
   \item $y_i \in$ \{0, 1\}: variable que indica si el nodo $i$ es visitado.
+  \item $w_i \geq 0$: variable continua que representa el tiempo de inicio del servicio en $i$.
 \end{itemize}
 
 \subsection{Función Objetivo}
@@ -293,20 +295,41 @@ del usuario.
 \begin{equation}
 y_1 = 1
 \end{equation}
-En (4) por simplicidad se determina el nodo inicial fijo.
+\begin{equation}
+w_1 = 0
+\end{equation}
+
+En (4) por simplicidad se determina el nodo inicial fijo y en (5) se determina que el servicio en el nodo 1 comienza en el tiempo 0.
 
 \begin{equation}
-\sum_{i \in V}\sum_{j \in V \setminus \{i\}} d_{ij} x_{ij} + \sum_{i \in V} t_i y_i \leq T
+e_i y_i \leq w_i \leq l_i y_i, \quad \forall i \in V \setminus \{1\}
 \end{equation}
-En (5) se asegura de que no se sobrepase el tiempo maximo del usuario.
+En (6), se fuerza a que el tiempo de inicio del servicio este dentro de la ventana de tiempo [$e_i$, $l_i$] solo si el nodo es visitado.
+\begin{itemize}
+  \item si $y_i = 1$ (nodo $i$ es visitado) la restriccion se vuelve $e_i \leq w_i \leq l_i$ obligando a que $w_i$ se encuentre en el rango.
+  \item si $y_i = 0$ (nodo $i$ no es visitado) la restriccion se vuelve $0 \leq w_i \leq 0$ lo que fuerza $w_i = 0$.
+\end{itemize}
 
 \begin{equation}
-\sum_{i \in S}\sum_{j \in V \setminus S} x_{ij} \geq y_h, \quad \forall S \subset V \quad : \quad 1 \in S, h \in V \setminus S
+w_j \geq w_i + t_i + d_{ij} - M(1-x_{ij}), \quad \forall(i,j) \in A, j \neq 1
 \end{equation}
-La ecuacion (6) garantiza que el ciclo encontrado este conectado e incluya al nodo de inicio. La restricción asegura que si un nodo
-$h$ está incluido en el ciclo (es decir, $y_h = 1$), entonces debe existir al menos un arco que salga del conjunto $S$ y entre a
-$V \setminus S$. Esto conecta $h$ con el nodo 1, ya que $S$ siempre contiene al nodo 1. Junto con (2) y (3) se garantiza que solo exista
-un ciclo. Este se llama ``sub-tour elimination constraint''.
+En (7) nos aseguramos que $w_j$ se vaya actualizando correctamente:
+\begin{itemize}
+  \item si $x_{ij} = 1$ (se viaja de $i$ a $j$), la restriccion se vuelve $w_j \geq w_i + t_i + d_{ij}$, lo que nos asegura que el
+  servicio en $j$ ($w_j$) comience despues de llegar a $j$.
+  \item si $x_{ij} = 0$, la restriccion se vuelve $w_j \geq w_i + t_i + d_{ij} - M$ lo cual es un numero negativo muy grande y la restriccion
+  no se activa.
+\end{itemize}
+
+\begin{equation}
+w_i + t_i + d_{i1} \leq T + M(1-x_{i1}), \quad \forall i \in V \setminus \{1\}
+\end{equation}
+En (8) se asegura de que no se sobrepase el tiempo maximo del usuario.
+\begin{itemize}
+  \item si $x_{ij} = 1$ (el arco ($i$, 1) se usa, entonces $i$ el es el ultimo nodo), la restriccion se activa: $w_i + t_i + d_{i1} \leq T$
+  Esto se asegura que la vuelta al inicio (nodo 1) sea menor a $T$.
+  \item si $x_{ij} = 0$ (no se esta en el ultimo nodo), la restriccion queda $w_i + t_i + d_{i1} \leq T + M$ y la restriccion no se activa.
+\end{itemize}
 
 \begin{equation}
 x_{ij} \in \{0, 1\}, \quad \forall (i,j) \in A
@@ -314,11 +337,18 @@ x_{ij} \in \{0, 1\}, \quad \forall (i,j) \in A
 \begin{equation}
 y_i \in \{0, 1\}, \quad \forall i \in V
 \end{equation}
-Finalmente en (7) y (8) se definen la naturaleza de las variables.
+\begin{equation}
+w_i \ge 0, \quad \forall i \in V
+\end{equation}
+Finalmente en (9), (10) y (11) se definen la naturaleza de las variables.
 
 \subsection{Espacio de búsqueda}
 La variable $y_i$ tiene espacio $2^n$, mientras que la variable $x_{ij}$ tiene espacio $2^{n^2}$,
-juntando ambas, el espacio total de este modelo es $2^{n + n^2}$ 
+juntando ambas, el espacio total de este modelo es $2^{n + n^2}$
+
+Es importante notar que las variables continuas $w_i$ no incrementan este espacio de búsqueda 
+combinatorio; su rol es definir el dominio para la verificación de la factibilidad temporal 
+(ventanas de tiempo) dentro de cada combinación binaria generada por $x_{ij}$ e $y_i$.
 
 \section{Conclusiones}
 El análisis del estado del arte revela que, si bien existen diversas técnicas para problemas relacionados con el Enhanced
