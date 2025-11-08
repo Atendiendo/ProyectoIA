@@ -17,3 +17,7 @@ HuertaM202273602.zip
 #Carpetas
 .vscode/
 CodigoProfe/
+
+#Archivos del compilado codigo
+*.o
+programa
