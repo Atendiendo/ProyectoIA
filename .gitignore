@@ -21,3 +21,6 @@ CodigoProfe/
 #Archivos del compilado codigo
 *.o
 programa
+
+#Outputs del codigo
+Codigo/*.txt

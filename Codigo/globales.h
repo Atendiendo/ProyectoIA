@@ -24,23 +24,27 @@ class solucion{
         int aptitud;
         vector<int> tour;
         char factibilidad;
+        int tiempo_servicio;
 
         solucion(int aptitud, int num_nodos){
             this->aptitud = aptitud;
             tour=vector<int>(num_nodos, 1);
             factibilidad = 'F';
+            tiempo_servicio = 0;
         }
 
         solucion(const solucion &a){
             aptitud=a.aptitud;
             tour=a.tour;
             factibilidad=a.factibilidad;
+            tiempo_servicio = a.tiempo_servicio;
         }
 
         solucion& operator=(const solucion &a){
             this->aptitud=a.aptitud;
             this->tour=a.tour;
             this->factibilidad=a.factibilidad;
+            this->tiempo_servicio = a.tiempo_servicio;
             return *this;
         }
 

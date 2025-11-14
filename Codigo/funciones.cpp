@@ -157,6 +157,7 @@ void funcion_evaluacion(solucion* solucion_actual, nodos* nodo, usuario* usuario
     //Restar penalizaciones
     aptitud -= penalizacion;
     solucion_actual->aptitud = aptitud;
+    solucion_actual->tiempo_servicio = tiempo_servicio;
 
     //INCREMENTAR LAS PENALIZACIONES
 }
@@ -218,4 +219,12 @@ void eliminacion(solucion * solucion_actual, solucion * candidata_solucion, nodo
   //Evaluar solucion
   funcion_evaluacion(candidata_solucion, nodo, usuario);
   return;
+}
+
+void escribir_salida(solucion * mejor_solucion, usuario * usuario, ofstream & res){
+    res<<mejor_solucion->aptitud<<endl;
+    res<<usuario->tiempo_max<<" "<<mejor_solucion->tiempo_servicio<<endl;
+    for(int i=0;i<mejor_solucion->tour.size();i++) res<<mejor_solucion->tour[i]<<" ";
+    res<<endl<<mejor_solucion->factibilidad<<endl;
+    return;
 }
