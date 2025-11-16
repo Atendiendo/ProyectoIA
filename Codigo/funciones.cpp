@@ -2,14 +2,14 @@
 #include "globales.h"
 #include "funciones.h"
 
-lectura leer_entradas(int cant_nodos, int instancia, int cant_usuarios){
-    ifstream nodos_file("Instancias/nodos/" + to_string(cant_nodos) + "_instancia_" + to_string(instancia) + ".txt");
+lectura leer_entradas(int cant_nodos, int instancia_nodos, int cant_usuarios, int instancia_usuarios){
+    ifstream nodos_file("Instancias/nodos/" + to_string(cant_nodos) + "_instancia_" + to_string(instancia_nodos) + ".txt");
     if (!nodos_file.is_open()) {
         cerr << "Error: No se pudo abrir/no existe el archivo de nodos." << endl;
         exit(1);
     }
 
-    ifstream users_file("Instancias/usuarios/" + to_string(cant_nodos) + "_instancia_" + to_string(instancia) + "_" +
+    ifstream users_file("Instancias/usuarios/" + to_string(cant_nodos) + "_instancia_" + to_string(instancia_usuarios) + "_" +
     to_string(cant_usuarios) + "us.txt");
     if (!users_file.is_open()) {
         cerr << "Error: No se pudo abrir/no existe el archivo de usuarios." << endl;

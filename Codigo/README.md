@@ -8,13 +8,13 @@
 - Para ejecutar con las configuraciones del Makefile usar comando  
     `make run`
 - Por linea de comando:  
-    ./HC+Restart cantNodos instancia cantUsuarios semilla restarts debug
+    ./HC+Restart cantNodos instanciaNodos cantUsuarios instanciaUsuarios semilla restarts debug
 
     - debug=0, no muestra informacion por pantalla
 
     - Ejemplo:  
-    ./HC+Restart 10 0 5 1234 10 0
-    ./HC+Restart 10 3 3 1235 10 1
+    ./HC+Restart 10 0 5 0 1234 10 0
+    ./HC+Restart 10 3 3 3 1235 10 1
 
 # Output
 - Se genera un archivo txt llamado sol_CantidadNodos_NumeroDeLaInstancia_instancia.txt,

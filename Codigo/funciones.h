@@ -1,7 +1,7 @@
 #ifndef FUNCIONES_H
 #define FUNCIONES_H
 
-lectura leer_entradas(int cant_nodos, int instancia, int cant_usuarios);
+lectura leer_entradas(int cant_nodos, int instancia_nodos, int cant_usuarios, int instancia_usuarios);
 void funcion_evaluacion(solucion* solucion_actual, nodos* nodo, usuario* usuario);
 void crear_solucion_aleatoria (solucion *i_temp, nodos* nodo, usuario* usuario);
 int int_rand (int a, int b);
