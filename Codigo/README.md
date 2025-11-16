@@ -7,7 +7,7 @@
 # Instrucciones de uso
 - Para ejecutar con las configuraciones del Makefile usar comando  
     `make run`
-- Por linea de comando:
+- Por linea de comando:  
     ./HC+Restart cantNodos instancia cantUsuarios semilla restarts debug
 
     - debug=0, no muestra informacion por pantalla
