@@ -17,9 +17,8 @@
     ./HC+Restart 10 3 3 3 1235 10 1
 
 # Output
-- Se genera un archivo txt llamado sol_CantidadNodos_NumeroDeLaInstancia_instancia.txt,
-    donde CantidadNodos corresponde al numero de nodos del tour y NumeroDeLaInstancia corresponde al numero de la instancia. Para
-    cada uno de los casos de prueba (usuarios):
+    - Se genera un archivo txt llamado sol_N_instancia_I.txt, donde N corresponde al numero de nodos del tour, e I es el
+    identificador de la instancia para cada uno de los casos de prueba (usuarios):
     - Primera linea: Valor del Tour (suma de valoraciones de nodos y arcos
     pertenecientes al tour generado).
     - Segunda linea : Tiempo total disponible y tiempo empleado en el tour
