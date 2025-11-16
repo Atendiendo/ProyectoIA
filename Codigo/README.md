@@ -17,7 +17,7 @@
     ./HC+Restart 10 3 3 3 1235 10 1
 
 # Output
-    - Se genera un archivo txt llamado sol_N_instancia_I.txt, donde N corresponde al numero de nodos del tour, e I es el
+- Se genera un archivo txt llamado sol_N_instancia_I.txt, donde N corresponde al numero de nodos del tour, e I es el
     identificador de la instancia para cada uno de los casos de prueba (usuarios):
     - Primera linea: Valor del Tour (suma de valoraciones de nodos y arcos
     pertenecientes al tour generado).
