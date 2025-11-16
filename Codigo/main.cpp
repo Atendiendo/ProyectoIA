@@ -2,16 +2,24 @@
 #include "globales.h"
 #include "funciones.h"
 
-int main() {
+int main(int argc, char *argv[]) {
     int semilla, debug, Mr, iteracion;
     int cant_nodos, instancia, cant_usuarios;
-    cout << "Ingresar cantidad de nodos, instancia, cantidad de usuarios, semilla, numero de restarts, debug separados por un espacio en blanco." << endl;
-    cin >> cant_nodos >> instancia >> cant_usuarios >> semilla >> Mr >> debug;
+    //cout << "Ingresar cantidad de nodos, instancia, cantidad de usuarios, semilla, numero de restarts, debug separados por un espacio en blanco." << endl;
+    //cin >> cant_nodos >> instancia >> cant_usuarios >> semilla >> Mr >> debug;
+
+    cant_nodos = atoi(argv[1]);
+    instancia = atoi(argv[2]);
+    cant_usuarios = atoi(argv[3]);
+    semilla = atoi(argv[4]);
+    Mr = atoi(argv[5]);
+    debug = atoi(argv[6]);
+
     lectura resultado_lectura;
     resultado_lectura = leer_entradas(cant_nodos, instancia, cant_usuarios);
     //Archivo salida
     ofstream res;
-    res.open("sol_" + to_string(cant_nodos) + "_" + to_string(instancia) + "_instancia.txt");
+    res.open("sol_" + to_string(cant_nodos) + "_instancia_" + to_string(instancia) + ".txt");
 
     nodos nodos_leidos;
     nodos_leidos = resultado_lectura.nodos_leidos;
@@ -42,7 +50,7 @@ int main() {
             //time_t ini_it=time(NULL);
             mejor_candidata=solucion_actual;
             //Aca tirar un if para definir el tipo de movimiento
-            for(int current=0;current<solucion_actual.tour.size();current++){
+            for(int current=1;current<solucion_actual.tour.size();current++){
                 if(debug) cout<<"\t\t\t\t  \t\t\t";
                 //Aca se define el vecindario
                 //Aca ver lo de los demas movimientos

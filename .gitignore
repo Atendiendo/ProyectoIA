@@ -20,7 +20,7 @@ CodigoProfe/
 
 #Archivos del compilado codigo
 *.o
-programa
+HC+Restart
 
 #Outputs del codigo
 Codigo/*.txt

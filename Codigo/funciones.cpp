@@ -137,8 +137,8 @@ void funcion_evaluacion(solucion* solucion_actual, nodos* nodo, usuario* usuario
             tiempo_servicio += nodo->ventanas_nodos[nodo_actual][0] - tiempo_servicio;
         }
         //Si no se finaliza el servicio en la ventana se penaliza segun el tiempo
-        if (nodo->tiempos_nodos[nodo_actual] > nodo->ventanas_nodos[nodo_actual][1]) {
-            penalizacion += nodo->tiempos_nodos[nodo_actual] - nodo->ventanas_nodos[nodo_actual][1];
+        if ((tiempo_servicio + nodo->tiempos_nodos[nodo_actual]) > nodo->ventanas_nodos[nodo_actual][1]) {
+            penalizacion += (tiempo_servicio + nodo->tiempos_nodos[nodo_actual]) - nodo->ventanas_nodos[nodo_actual][1];
             //Marcar infactible
             solucion_actual->factibilidad = 'I';
         }
@@ -166,12 +166,16 @@ void crear_solucion_aleatoria (solucion *i_temp, nodos* nodo, usuario* usuario){
   int rand;
 
   i_temp->tour.resize(nodo->num_nodos);
-  //creacion de la permutacion aleatoria
-  int set[nodo->num_nodos];
-  for(int i=0;i<nodo->num_nodos;i++)
-    set[i]=i;
 
-  for (int i=0;i<nodo->num_nodos;i++){
+  //Se empieza en el nodo 0
+  i_temp->tour[0] = 0;
+
+  //creacion de la permutacion aleatoria
+  int set[nodo->num_nodos - 1];
+  for(int i=0;i<nodo->num_nodos - 1;i++)
+    set[i]=i + 1;
+
+  for (int i=1;i<nodo->num_nodos;i++){
     rand=int_rand(0,(nodo->num_nodos-i)); // Un elemento del arreglo (entre 0 y Tinstancia-1 la primera vez y asi...)
     i_temp->tour[i]=set[rand]; 
     set[rand]=set[nodo->num_nodos-i-1];
@@ -197,34 +201,40 @@ int int_rand (int a, int b){
 
 void SWaP(solucion * solucion_actual, solucion * candidata_solucion, nodos* nodo, usuario* usuario, int pos1, int pos2, int debug){
   int aux;
-  //copiar la informacion de solucion actual en candidata a solucion
-  pos2=pos2%solucion_actual->tour.size();
   *candidata_solucion=*solucion_actual;
-  if(debug) cout<<"\t"<<pos1<<"->"<<pos2;
-  //Intercambiar la informacion 
-  aux=(candidata_solucion)->tour[pos1];
-  (candidata_solucion)->tour[pos1]=(candidata_solucion)->tour[pos2];
-  (candidata_solucion)->tour[pos2]=aux;
-  //Evaluar solucion
+  //Solo si el inicio no se swapea
+  if (pos1 != 0 && pos2 != 0){
+    //copiar la informacion de solucion actual en candidata a solucion
+    pos2=pos2%solucion_actual->tour.size();
+    if(debug) cout<<"\t"<<pos1<<"->"<<pos2;
+    //Intercambiar la informacion 
+    aux=(candidata_solucion)->tour[pos1];
+    (candidata_solucion)->tour[pos1]=(candidata_solucion)->tour[pos2];
+    (candidata_solucion)->tour[pos2]=aux;
+    //Evaluar solucion
+  }
   funcion_evaluacion(candidata_solucion, nodo, usuario);
   return;
 }
 
 void eliminacion(solucion * solucion_actual, solucion * candidata_solucion, nodos* nodo, usuario* usuario, int nodo_eliminar, int debug){
-  *candidata_solucion=*solucion_actual;
-  //Eliminar nodo
-  int nodo_eliminado_id = candidata_solucion->tour[nodo_eliminar];
-  if (debug) cout<<"\t"<<nodo_eliminado_id<<" Out";
-  candidata_solucion->tour.erase(candidata_solucion->tour.begin() + nodo_eliminar);
-  //Evaluar solucion
-  funcion_evaluacion(candidata_solucion, nodo, usuario);
-  return;
+    *candidata_solucion=*solucion_actual;
+    //No se puede eliminar el inicio
+    if (nodo_eliminar != 0){
+        //Eliminar nodo
+        int nodo_eliminado_id = candidata_solucion->tour[nodo_eliminar];
+        if (debug) cout<<"\t"<<nodo_eliminado_id<<" Out";
+        candidata_solucion->tour.erase(candidata_solucion->tour.begin() + nodo_eliminar);
+    }
+    //Evaluar solucion
+    funcion_evaluacion(candidata_solucion, nodo, usuario);
+    return;
 }
 
 void escribir_salida(solucion * mejor_solucion, usuario * usuario, ofstream & res){
     res<<mejor_solucion->aptitud<<endl;
     res<<usuario->tiempo_max<<" "<<mejor_solucion->tiempo_servicio<<endl;
     for(int i=0;i<mejor_solucion->tour.size();i++) res<<mejor_solucion->tour[i]<<" ";
-    res<<endl<<mejor_solucion->factibilidad<<endl;
+    res<<endl;
     return;
 }
