@@ -13,7 +13,7 @@
     - debug=0, no muestra informacion por pantalla
 
     - Ejemplo:  
-    ./HC+Restart 10 0 5 0 1234 10 0
+    ./HC+Restart 10 0 5 0 1234 10 0  
     ./HC+Restart 10 3 3 3 1235 10 1
 
 # Output
