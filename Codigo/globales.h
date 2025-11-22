@@ -23,6 +23,7 @@ class solucion{
     public:
         int aptitud;
         vector<int> tour;
+        vector<int> nodos_no_visitados;
         char factibilidad;
         int tiempo_servicio;
 
@@ -36,6 +37,7 @@ class solucion{
         solucion(const solucion &a){
             aptitud=a.aptitud;
             tour=a.tour;
+            nodos_no_visitados=a.nodos_no_visitados;
             factibilidad=a.factibilidad;
             tiempo_servicio = a.tiempo_servicio;
         }
@@ -43,6 +45,7 @@ class solucion{
         solucion& operator=(const solucion &a){
             this->aptitud=a.aptitud;
             this->tour=a.tour;
+            this->nodos_no_visitados=a.nodos_no_visitados;
             this->factibilidad=a.factibilidad;
             this->tiempo_servicio = a.tiempo_servicio;
             return *this;

@@ -149,40 +149,51 @@ void funcion_evaluacion(solucion* solucion_actual, nodos* nodo, usuario* usuario
     tiempo_servicio += nodo->matriz_tiempos[ultimo_nodo][solucion_actual->tour[0]];
     //Penalizar si se sobrepasa el tiempo maximo
     if (tiempo_servicio > usuario->tiempo_max) {
-        penalizacion += tiempo_servicio - usuario->tiempo_max;
+        penalizacion += (tiempo_servicio - usuario->tiempo_max);
         //Marcar infactible
         solucion_actual->factibilidad = 'I';
     }
 
-    //Restar penalizaciones
-    aptitud -= penalizacion;
+    //Restar penalizaciones * 10
+    aptitud -= (penalizacion * 10);
     solucion_actual->aptitud = aptitud;
     solucion_actual->tiempo_servicio = tiempo_servicio;
-
-    //INCREMENTAR LAS PENALIZACIONES
 }
 
 void crear_solucion_aleatoria (solucion *i_temp, nodos* nodo, usuario* usuario){
-  int rand;
+    int rand;
 
-  i_temp->tour.resize(nodo->num_nodos);
+    int tamano_tour_a_llenar = (nodo->num_nodos / 2) + 1;
 
-  //Se empieza en el nodo 0
-  i_temp->tour[0] = 0;
+    i_temp->tour.resize(tamano_tour_a_llenar); 
 
-  //creacion de la permutacion aleatoria
-  int set[nodo->num_nodos - 1];
-  for(int i=0;i<nodo->num_nodos - 1;i++)
-    set[i]=i + 1;
+    i_temp->nodos_no_visitados.clear();
 
-  for (int i=1;i<nodo->num_nodos;i++){
-    rand=int_rand(0,(nodo->num_nodos-i)); // Un elemento del arreglo (entre 0 y Tinstancia-1 la primera vez y asi...)
-    i_temp->tour[i]=set[rand]; 
-    set[rand]=set[nodo->num_nodos-i-1];
-  }
-  //calculo de la aptitud de la solucion
-  funcion_evaluacion(i_temp, nodo, usuario);
-  return;
+    //Se empieza en el nodo 0
+    i_temp->tour[0] = 0;
+
+    //creacion de la permutacion aleatoria
+    vector<int> set;
+    for(int i = 1; i < nodo->num_nodos; i++) {
+        set.push_back(i);
+    }
+
+    for (int i=1;i<tamano_tour_a_llenar;i++){
+        rand = int_rand(0, set.size() - 1); 
+        
+        i_temp->tour[i]=set[rand]; 
+        
+        set[rand] = set.back();
+        set.pop_back();
+    }
+
+    for (int nodo_no_visitado : set) {
+        i_temp->nodos_no_visitados.push_back(nodo_no_visitado);
+    }
+
+    //calculo de la aptitud de la solucion
+    funcion_evaluacion(i_temp, nodo, usuario);
+    return;
 }
 
 int int_rand (int a, int b){
@@ -199,7 +210,15 @@ int int_rand (int a, int b){
   return retorno;
 }
 
-void SWaP(solucion * solucion_actual, solucion * candidata_solucion, nodos* nodo, usuario* usuario, int pos1, int pos2, int debug){
+void escribir_salida(solucion * mejor_solucion, usuario * usuario, ofstream & res){
+    res<<mejor_solucion->aptitud<<endl;
+    res<<usuario->tiempo_max<<" "<<mejor_solucion->tiempo_servicio<<endl;
+    for(int i=0;i<mejor_solucion->tour.size();i++) res<<mejor_solucion->tour[i]<<" ";
+    res<<endl;
+    return;
+}
+
+void opt_2(solucion * solucion_actual, solucion * candidata_solucion, nodos* nodo, usuario* usuario, int pos1, int pos2, int debug){
   int aux;
   *candidata_solucion=*solucion_actual;
   //Solo si el inicio no se swapea
@@ -225,16 +244,105 @@ void eliminacion(solucion * solucion_actual, solucion * candidata_solucion, nodo
         int nodo_eliminado_id = candidata_solucion->tour[nodo_eliminar];
         if (debug) cout<<"\t"<<nodo_eliminado_id<<" Out";
         candidata_solucion->tour.erase(candidata_solucion->tour.begin() + nodo_eliminar);
+        candidata_solucion->nodos_no_visitados.push_back(nodo_eliminado_id);
     }
     //Evaluar solucion
     funcion_evaluacion(candidata_solucion, nodo, usuario);
     return;
 }
 
-void escribir_salida(solucion * mejor_solucion, usuario * usuario, ofstream & res){
-    res<<mejor_solucion->aptitud<<endl;
-    res<<usuario->tiempo_max<<" "<<mejor_solucion->tiempo_servicio<<endl;
-    for(int i=0;i<mejor_solucion->tour.size();i++) res<<mejor_solucion->tour[i]<<" ";
-    res<<endl;
-    return;
+void addition(solucion * solucion_actual, solucion * candidata_solucion, nodos* nodo, usuario* usuario, int nodo_agregar, int debug){
+    solucion mejor_solucion(0, nodo->num_nodos);
+    mejor_solucion=*solucion_actual;
+    bool mejoro = false;
+    int pos_agregada = 0;
+    for (int i = 1; i < solucion_actual->tour.size(); i++) {
+        *candidata_solucion=*solucion_actual;
+        candidata_solucion->tour.insert(candidata_solucion->tour.begin() + i, candidata_solucion->nodos_no_visitados[nodo_agregar]);
+        //Evaluar solucion
+        funcion_evaluacion(candidata_solucion, nodo, usuario);
+        if (candidata_solucion->aptitud > mejor_solucion.aptitud) {
+            mejor_solucion = *candidata_solucion;
+            mejoro = true;
+            pos_agregada = i;
+        }
+    }
+    //Aca eliminar el nodo de nodos_no_visitados
+    if (mejoro==true) {
+        if (debug) cout<<"\t"<<candidata_solucion->nodos_no_visitados[nodo_agregar]<<" In pos " << pos_agregada;
+        *candidata_solucion=mejor_solucion;
+        candidata_solucion->nodos_no_visitados.erase(candidata_solucion->nodos_no_visitados.begin() + nodo_agregar);
+    } else {
+        if (debug) cout<<"\tSin insercion";
+        *candidata_solucion=*solucion_actual;
+    }
+}
+
+void swap(solucion * solucion_actual, solucion * candidata_solucion, nodos* nodo, usuario* usuario, int pos_nodo_swapear, int debug) {
+    solucion mejor_solucion(0, nodo->num_nodos);
+    mejor_solucion=*solucion_actual;
+    bool mejoro = false;
+    int pos_swapeada = 0;
+    int aux;
+
+    for (int i = 1; i < solucion_actual->tour.size(); i++) {
+        if (i != pos_nodo_swapear) {
+            *candidata_solucion=*solucion_actual;
+            //copiar la informacion de solucion actual en candidata a solucion
+            //Intercambiar la informacion 
+            aux=(candidata_solucion)->tour[pos_nodo_swapear];
+            (candidata_solucion)->tour[pos_nodo_swapear]=(candidata_solucion)->tour[i];
+            (candidata_solucion)->tour[i]=aux;
+            //Evaluar solucion
+            funcion_evaluacion(candidata_solucion, nodo, usuario);
+            if (candidata_solucion->aptitud > mejor_solucion.aptitud) {
+                mejor_solucion = *candidata_solucion;
+                mejoro = true;
+                pos_swapeada = i;
+            }
+        }
+    }
+
+    if (mejoro==true) {
+        if (debug) cout<<"\t"<<solucion_actual->tour[pos_nodo_swapear]<<" swap " << solucion_actual->tour[pos_swapeada];
+        *candidata_solucion=mejor_solucion;
+    } else {
+        if (debug) cout<<"\tSin swap";
+        *candidata_solucion=*solucion_actual;
+    }
+    
+}
+
+void exchange(solucion * solucion_actual, solucion * candidata_solucion, nodos* nodo, usuario* usuario, int pos_nodo_swapear, int debug) {
+    solucion mejor_solucion(0, nodo->num_nodos);
+    mejor_solucion=*solucion_actual;
+    bool mejoro = false;
+    int pos_swapeada = 0;
+    int aux;
+
+    for (int i = 1; i < solucion_actual->tour.size(); i++) {
+        if (i != pos_nodo_swapear) {
+            *candidata_solucion=*solucion_actual;
+            //copiar la informacion de solucion actual en candidata a solucion
+            //Intercambiar la informacion 
+            aux=(candidata_solucion)->nodos_no_visitados[pos_nodo_swapear];
+            (candidata_solucion)->nodos_no_visitados[pos_nodo_swapear]=(candidata_solucion)->tour[i];
+            (candidata_solucion)->tour[i]=aux;
+            //Evaluar solucion
+            funcion_evaluacion(candidata_solucion, nodo, usuario);
+            if (candidata_solucion->aptitud > mejor_solucion.aptitud) {
+                mejor_solucion = *candidata_solucion;
+                mejoro = true;
+                pos_swapeada = i;
+            }
+        }
+    }
+
+    if (mejoro==true) {
+        if (debug) cout<<"\t"<<solucion_actual->nodos_no_visitados[pos_nodo_swapear]<<" exchange " << solucion_actual->tour[pos_swapeada];
+        *candidata_solucion=mejor_solucion;
+    } else {
+        if (debug) cout<<"\tSin exchange";
+        *candidata_solucion=*solucion_actual;
+    }
 }

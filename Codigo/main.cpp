@@ -32,6 +32,7 @@ int main(int argc, char *argv[]) {
     //semilla aleatoria
     srand48 (semilla);
     bool optimo_local;
+    int movimiento;
 
     //Iterar sobre usuarios
     for (int i = 0; i < cant_usuarios; i++) {
@@ -50,17 +51,93 @@ int main(int argc, char *argv[]) {
             if(debug) cout<<"   "<<restart+1 <<" \t     "<<iteracion+1<<"\t\t"<<solucion_actual<<endl;
             //time_t ini_it=time(NULL);
             mejor_candidata=solucion_actual;
-            //Aca tirar un if para definir el tipo de movimiento
-            for(int current=1;current<solucion_actual.tour.size();current++){
-                if(debug) cout<<"\t\t\t\t  \t\t\t";
-                //Aca se define el vecindario
-                //Aca ver lo de los demas movimientos
-                //SWaP(&solucion_actual, &candidata_solucion, &nodos_leidos, &usuarios_list[0], current, current+1, debug);
-                eliminacion(&solucion_actual, &candidata_solucion, &nodos_leidos, &usuarios_list[i], current, debug);
-                if(debug) cout<<"\t"<< candidata_solucion<<endl;
-                if(candidata_solucion.aptitud > mejor_candidata.aptitud)
-                    mejor_candidata=candidata_solucion;
+
+            //Si se sobrepasa tiempo maximo, eliminar nodos
+            if (solucion_actual.factibilidad == 'I' && solucion_actual.tour.size() > 2) {
+                for(int current=1;current<solucion_actual.tour.size();current++){
+                    if(debug) cout<<"\t\t\t\t  \t\t\t";
+                    eliminacion(&solucion_actual, &candidata_solucion, &nodos_leidos, &usuarios_list[i], current, debug);
+                    if(debug) cout<<"\t"<< candidata_solucion<<endl;
+                    if(candidata_solucion.aptitud > mejor_candidata.aptitud)
+                        mejor_candidata=candidata_solucion;
+                }
+            } else {
+                //Elegir tipo movimiento
+                movimiento = int_rand(0,4);
+                switch (movimiento) {
+                    case 0:
+                        //Ejecutar opt_2
+                        for(int current=1;current<solucion_actual.tour.size() - 1;current++){
+                            if(debug) cout<<"\t\t\t\t  \t\t\t";
+                            opt_2(&solucion_actual, &candidata_solucion, &nodos_leidos, &usuarios_list[i], current, current+1, debug);
+                            if(debug) cout<<"\t"<< candidata_solucion<<endl;
+                            if(candidata_solucion.aptitud > mejor_candidata.aptitud)
+                                mejor_candidata=candidata_solucion;
+                        }
+                        break;
+                    case 1:
+                        //Ejecutar addition si se puede
+                        if (solucion_actual.nodos_no_visitados.size() > 0) {
+                            for (int j = 0; j < solucion_actual.nodos_no_visitados.size(); j++) {
+                                if(debug) cout<<"\t\t\t\t  \t\t\t";
+                                addition(&solucion_actual, &candidata_solucion, &nodos_leidos, &usuarios_list[i], j, debug);
+                                if(debug) cout<<"\t"<< candidata_solucion<<endl;
+                                if(candidata_solucion.aptitud > mejor_candidata.aptitud)
+                                    mejor_candidata=candidata_solucion;
+                            }
+                        } else { //Si no se puede ejecutar eliminacion
+                            for(int current=1;current<solucion_actual.tour.size();current++){
+                                if(debug) cout<<"\t\t\t\t  \t\t\t";
+                                eliminacion(&solucion_actual, &candidata_solucion, &nodos_leidos, &usuarios_list[i], current, debug);
+                                if(debug) cout<<"\t"<< candidata_solucion<<endl;
+                                if(candidata_solucion.aptitud > mejor_candidata.aptitud)
+                                    mejor_candidata=candidata_solucion;
+                            }
+                        }
+                        break;
+                    case 2:
+                        //Ejecutar swap
+                        for(int current=1;current<solucion_actual.tour.size();current++){
+                            if(debug) cout<<"\t\t\t\t  \t\t\t";
+                            swap(&solucion_actual, &candidata_solucion, &nodos_leidos, &usuarios_list[i], current, debug);
+                            if(debug) cout<<"\t"<< candidata_solucion<<endl;
+                            if(candidata_solucion.aptitud > mejor_candidata.aptitud)
+                                    mejor_candidata=candidata_solucion;
+                        }
+                        break;
+                    case 3:
+                        //Ejecutar exchange
+                        for(int current=1;current<solucion_actual.nodos_no_visitados.size();current++){
+                            if(debug) cout<<"\t\t\t\t  \t\t\t";
+                            exchange(&solucion_actual, &candidata_solucion, &nodos_leidos, &usuarios_list[i], current, debug);
+                            if(debug) cout<<"\t"<< candidata_solucion<<endl;
+                            if(candidata_solucion.aptitud > mejor_candidata.aptitud)
+                                    mejor_candidata=candidata_solucion;
+                        }
+                        break;
+                    case 4:
+                        //Ejecutar eliminacion si se puede
+                        if (solucion_actual.tour.size() > 2) {
+                            for(int current=1;current<solucion_actual.tour.size();current++){
+                                if(debug) cout<<"\t\t\t\t  \t\t\t";
+                                eliminacion(&solucion_actual, &candidata_solucion, &nodos_leidos, &usuarios_list[i], current, debug);
+                                if(debug) cout<<"\t"<< candidata_solucion<<endl;
+                                if(candidata_solucion.aptitud > mejor_candidata.aptitud)
+                                    mejor_candidata=candidata_solucion;
+                            }
+                        } else { //Si no se puede ejecutar addition
+                            for (int j = 0; j < solucion_actual.nodos_no_visitados.size(); j++) {
+                                if(debug) cout<<"\t\t\t\t  \t\t\t";
+                                addition(&solucion_actual, &candidata_solucion, &nodos_leidos, &usuarios_list[i], j, debug);
+                                if(debug) cout<<"\t"<< candidata_solucion<<endl;
+                                if(candidata_solucion.aptitud > mejor_candidata.aptitud)
+                                    mejor_candidata=candidata_solucion;
+                            }
+                        }
+                        break;
+                }
             }
+
             iteracion++;
             if(debug) getchar();
             if(mejor_candidata.aptitud>solucion_actual.aptitud) //Maximizacion
@@ -78,6 +155,7 @@ int main(int argc, char *argv[]) {
         escribir_salida(&mejor_solucion, &usuarios_list[i], res);
         cout << "Mejor solucion usuario " << i << endl;
         cout << mejor_solucion << endl;
+        cout << endl;
     }
     res.close();
 
