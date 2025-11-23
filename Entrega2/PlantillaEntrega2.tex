@@ -10,6 +10,7 @@
 \usepackage{tikz}
 \usetikzlibrary{positioning,arrows,automata,shapes.misc}
 \usepackage{float}
+\usepackage[linesnumbered,ruled,vlined]{algorithm2e}
 
 
 \begin{document}
@@ -332,6 +333,12 @@ elemento corresponde a un identificador único de un nodo visitado y la posició
 Como se definió en la sección anterior, el nodo inicial es fijo (nodo 1). Por consiguiente, la estructura asume implícitamente
 que el recorrido comienza en dicho nodo y que existe una arista de retorno desde el último elemento de la lista hacia el primero,
 cerrando así el ciclo. Aquellos nodos que no se encuentran en la lista se consideran no visitados en la solución actual.
+
+Cabe destacar que esta codificación no impone el cumplimiento estricto de las restricciones específicas del problema
+(como capacidad o ventanas de tiempo). Por lo tanto, el espacio de búsqueda abarca tanto soluciones factibles como infactibles.
+Estas últimas son admitidas temporalmente durante el proceso de búsqueda para permitir una exploración más fluida,
+siendo penalizadas en la función objetivo según el tiempo sobrepasado.
+
 \subsection{Justificación de la Representación}
 \begin{itemize}
   \item \textbf{Eficiencia y Reducción del Espacio de Búsqueda:} A diferencia de una matriz binaria de adyacencia, esta lista compacta
@@ -379,15 +386,67 @@ La representación en forma de lista para esta solución específica corresponde
 inicia en 1, avanza secuencialmente hacia 2, 3 y 4, y finalmente retorna al nodo 1
 
 \section{Descripción del algoritmo}
-C\'omo fue implementada la soluci\'on. Interesa la implementaci\'on particular m\'as que el algoritmo gen\'erico, es decir, si se tiene que implementar SA, lo que se espera es que se explique en pseudoc\'odigo la estructura
-general y en p\'arrafos explicativos c\'omo fue implementada cada parte para su problema particular. Si
-se utilizan operadores/movimientos se debe justificar por qu\'e se utilizaron dichos operadores/movimientos. 
-En caso de una t\'ecnica completa, describir detalles relevantes del proceso, si se utiliza recursi\'on o no, explicar c\'omo se van construyendo soluciones, cu\'ando se revisan restricciones, c\'omo se registran conflictos, etc. En este punto no se espera que se incluya c\'odigo, eso va aparte.
+
+\subsection{Visión general del enfoque}
+La solución implementada corresponde a un algoritmo de Hill-Climbing con Restart Best Improvement.
+El enfoque combina dos ideas principales:
+(i) intensificación, mejorando iterativamente una solución inicial mediante operadores locales, y
+(ii) diversificación, introducida a través de reinicios que permiten escapar de óptimos locales.
+La estructura general y el flujo de control del procedimiento propuesto se detallan en el Algoritmo \ref{alg:hill_climbing_restarts}.
+
+\subsection{Generación de solución inicial}
+La solución inicial se genera construyendo una permutación aleatoria que contiene aproximadamente la mitad de los nodos disponibles.
+Este mismo procedimiento se utiliza cada vez que ocurre un reinicio.
+
+La elección de generar únicamente la mitad del número total de nodos es por razones de factibilidad.
+En etapas iniciales se intentó construir soluciones que incluyeran todos los nodos, pero estas solían resultar infactibles y
+requerían un número significativamente mayor de iteraciones para converger hacia una solución válida.
+
+\subsection{Función de evaluación}
+La función de evaluación analiza secuencialmente la permutación construida (Algoritmo \ref{alg:funcion_evaluacion}) y:
+\begin{itemize}
+  \item acumula los beneficios de nodos y arcos,
+  \item suma los tiempos de viaje y servicio,
+  \item respeta las ventanas de tiempo (esperando si se llega antes),
+  \item penaliza las violaciones de ventanas y del tiempo máximo del usuario, marcando la solución como infactible cuando corresponde.
+\end{itemize}
+
+\subsection{Operadores / movimientos}
+Los operadores de vecindario seleccionados se basan en la versión estocástica de la heurística
+Multi-start hyper-heuristic approaches for PTP \(MSHH\_RAND\), propuesta por \cite{DASARI2021100897}.
+Esta elección se justifica por el desempeño superior que dicha configuración demostró para el problema PTP en la literatura
+de referencia. Los operadores considerados son:
+\begin{itemize}
+  \item \textbf{Addition}: inserta un nodo del conjunto de no visitados en el tour, con el objetivo de intensificar la búsqueda.
+  Algoritmo \ref{alg:addition}.
+  
+  \item \textbf{Delete}: elimina un nodo del tour, generalmente para corregir infactibilidades asociadas al tiempo máximo.
+  \item \textbf{Swap}: intercambia dos nodos dentro del tour, promoviendo intensificación.
+  \item \textbf{Exchange}: intercambia un nodo dentro del tour con uno fuera del tour.
+  \item \textbf{2-opt}: revierte un segmento del tour, reduciendo potencialmente el costo del recorrido.
+\end{itemize}
+
+Ninguno de estos movimientos emplea parámetros adicionales específicos; la búsqueda se guía únicamente por la solución
+actual y por el vecindario generado por el operador seleccionado.
 
 \section{Experimentos}
-Se necesita saber c\'omo experimentaron, c\'omo definieron par\'ametros, 
-c\'omo los fueron modificando, cu\'ales problemas/instancias se estudiaron y por qu\'e, etc. 
-Recuerde que las t\'ecnicas completas son deterministas y las t\'ecnicas incompletas son estoc\'asticas.
+El propósito de esta sección es detallar el diseño experimental utilizado para evaluar el desempeño del algoritmo propuesto.
+Se describen los objetivos de la experimentación, las instancias seleccionadas, el hardware empleado y los parámetros considerados,
+además de justificar sus valores y el procedimiento seguido para ajustarlos.
+
+\subsection{Objetivos experimentación}
+
+\subsection{Instancias elegidas}
+
+\subsection{Hardware utilizado}
+
+\subsection{Parámetros y detalles importantes}
+\begin{itemize}
+  \item \textbf{Cantidad de Nodos}
+  \item \textbf{Cantidad de Usuarios}
+  \item \textbf{semilla}
+  \item \textbf{Cantidad de Restarts}
+\end{itemize}
 
 \section{Resultados}
 Qu\'e fue lo que se logr\'o con la experimentaci\'on, incluir tablas y gr\'aficos (lo m\'as explicativos posible).
@@ -398,5 +457,183 @@ Conclusiones RELEVANTES del estudio realizado. Incluir conclusiones acerca de la
 
 \bibliographystyle{plain}
 \bibliography{Referencias}
+
+\section{Anexo}
+\begin{algorithm}
+\caption{Creación de Solución Aleatoria}
+\label{alg:crear_solucion_aleatoria}
+\SetKwInOut{Input}{Entrada}
+\SetKwInOut{Output}{Salida}
+
+\Input{Datos de nodos $N$, Datos de usuario $U$}
+\Output{Solución inicial aleatoria $S$}
+
+$tamano \gets (N.num\_nodos / 2) + 1$\;
+
+\tcp{El tour siempre comienza en el nodo 0}
+$S.tour[0] \gets 0$\;
+
+\tcp{Creación del conjunto de candidatos}
+$Set \gets \emptyset$\;
+\For{$i \gets 1$ \KwTo $N.num\_nodos - 1$}{
+    Agregar $i$ a $Set$\;
+}
+
+\For{$i \gets 1$ \KwTo $tamano - 1$}{
+    $rand \gets$ entero aleatorio en $[0, |Set| - 1]$\;
+    
+    $S.tour[i] \gets Set[rand]$\;
+    
+    \tcp{Eliminación del candidato usado}
+    $Set[rand] \gets Set.ultimo$\;
+    Eliminar último elemento de $Set$\;
+}
+
+\ForEach{$nodo$ en $Set$}{
+    Agregar $nodo$ a $S.no\_visitados$\;
+}
+
+\tcp{Cálculo de aptitud}
+FuncionEvaluacion($S, N, U$)\;
+
+\Return $S$\;
+\end{algorithm}
+
+\begin{algorithm}
+\caption{Función de Evaluación de Solución}
+\label{alg:funcion_evaluacion}
+\SetKwInOut{Input}{Entrada}
+\SetKwInOut{Output}{Salida}
+
+\Input{Solución $S$, Datos Nodos $N$, Datos Usuario $U$}
+\Output{Aptitud y Factibilidad actualizadas en $S$}
+
+$S.factibilidad \gets F$\;
+$aptitud \gets 0, tiempo \gets 0, penalizacion \gets 0$\;
+$M \gets |S.tour|$\;
+
+\For{$i \gets 0$ \KwTo $M - 1$}{
+    $u \gets S.tour[i]$\;
+    
+    \tcp{Sumar beneficios}
+    $aptitud \gets aptitud + U.beneficio\_nodo[u]$\;
+    \If{$i < M - 1$}{
+        $v \gets S.tour[i+1]$\;
+        $aptitud \gets aptitud + U.beneficio\_arco[u][v]$\;
+    }
+    
+    \tcp{Acumular tiempos}
+    $tiempo \gets tiempo + N.tiempo\_servicio[u]$\;
+    \If{$i < M - 1$}{
+        $tiempo \gets tiempo + N.tiempo\_viaje[u][v]$\;
+    }
+    
+    \tcp{Verificar ventana de tiempo (inicio)}
+    \If{$tiempo < N.ventana[u].inicio$}{
+        $tiempo \gets tiempo + (N.ventana[u].inicio - tiempo)$\;
+    }
+    
+    \tcp{Verificar ventana de tiempo (fin)}
+    \If{$(tiempo + N.tiempo\_servicio[u]) > N.ventana[u].fin$}{
+        $penalizacion \gets penalizacion + (tiempo + N.tiempo\_servicio[u]) - N.ventana[u].fin$\;
+        $S.factibilidad \gets I$\;
+    }
+}
+
+\tcp{Cierre del ciclo (retorno al inicio)}
+$ultimo \gets S.tour[M-1]$\;
+$primero \gets S.tour[0]$\;
+
+$aptitud \gets aptitud + U.beneficio\_arco[ultimo][primero]$\;
+$tiempo \gets tiempo + N.tiempo\_viaje[ultimo][primero]$\;
+
+\tcp{Validación de tiempo máximo total}
+\If{$tiempo > U.tiempo\_max$}{
+    $penalizacion \gets penalizacion + (tiempo - U.tiempo\_max)$\;
+    $S.factibilidad \gets I$\;
+}
+
+$aptitud \gets aptitud - (penalizacion \times 10)$\;
+$S.aptitud \gets aptitud$\;
+$S.tiempo \gets tiempo$\;
+
+\end{algorithm}
+
+\begin{algorithm}
+\caption{Operador de Adición}
+\label{alg:addition}
+\SetKwInOut{Input}{Entrada}
+\SetKwInOut{Output}{Salida}
+
+\Input{Solución actual $S$, índice $k$, Datos $N, U$}
+\Output{Solución candidata $S_{cand}$}
+
+$S_{best} \gets S$\;
+$nodo \gets S.no\_visitados[k]$\;
+
+\For{$i \gets 1$ \KwTo $|S.tour|$}{
+    $S' \gets S$\;
+    Insertar $nodo$ en $S'.tour$ en posición $i$\;
+    FuncionEvaluacion($S', N, U$)\;
+    
+    \If{$S'.aptitud > S_{best}.aptitud$}{
+        $S_{best} \gets S'$\;
+    }
+}
+
+\eIf{$S_{best}.aptitud > S.aptitud$}{
+    $S_{cand} \gets S_{best}$\;
+    Eliminar $nodo$ de $S_{cand}.no\_visitados$\;
+}{
+    $S_{cand} \gets S$\;
+}
+\end{algorithm}
+
+\begin{algorithm}
+\caption{Hill Climbing con Restart y Selección Aleatoria de movimientos}
+\label{alg:hill_climbing_restarts}
+\SetKwInOut{Input}{Entrada}
+\SetKwInOut{Output}{Salida}
+
+\Input{Usuarios $\mathcal{U}$, Nodos $N$, MaxReinicios $M_r$}
+\Output{Mejores soluciones encontradas para cada usuario}
+
+\For{cada usuario $u \in \mathcal{U}$}{
+    $S_{best} \gets \emptyset$\;
+    
+    \For{$r \gets 1$ \KwTo $M_r$}{
+        $S \gets$ CrearSolucionAleatoria($N, u$)\;
+        $OptimoLocal \gets \text{Falso}$\;
+        
+        \While{No $OptimoLocal$}{
+            $S_{cand} \gets S$\;
+            
+            \eIf{$S$ es infactible $\land$ $|S.tour| > 2$}{
+                \tcp{Forzar reparación reduciendo tamaño}
+                $S_{cand} \gets$ BuscarMejorVecino(Eliminación, $S$)\;
+            }{
+                \tcp{Selección estocástica del operador}
+                $Op \gets$ Aleatorio(\{Opt-2, Addition, Swap, Exchange, Eliminación\})\;
+                
+                \tcp{Estrategia Best Improvement: Se explora todo el vecindario del tipo seleccionado}
+                $S_{cand} \gets$ BuscarMejorVecino($Op, S$)\;
+            }
+            
+            \eIf{$f(S_{cand}) > f(S)$}{
+                $S \gets S_{cand}$ \tcp*{Aceptar mejora}
+            }{
+                $OptimoLocal \gets \text{Verdadero}$ \tcp*{Estancamiento}
+            }
+        }
+        
+        \If{$f(S) > f(S_{best})$}{
+            $S_{best} \gets S$\;
+        }
+    }
+    Guardar $S_{best}$\;
+}
+\end{algorithm}
+
+
 
 \end{document} 
