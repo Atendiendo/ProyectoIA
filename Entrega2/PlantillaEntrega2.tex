@@ -430,22 +430,51 @@ Ninguno de estos movimientos emplea parámetros adicionales específicos; la bú
 actual y por el vecindario generado por el operador seleccionado.
 
 \section{Experimentos}
-El propósito de esta sección es detallar el diseño experimental utilizado para evaluar el desempeño del algoritmo propuesto.
-Se describen los objetivos de la experimentación, las instancias seleccionadas, el hardware empleado y los parámetros considerados,
-además de justificar sus valores y el procedimiento seguido para ajustarlos.
-
 \subsection{Objetivos experimentación}
+El objetivo de la experimentación es analizar cómo los principales parámetros del algoritmo afectan la calidad, factibilidad y
+tiempo de ejecución de las soluciones generadas. Para ello, se estudiaron dos factores independientes:
+(i) la cantidad de nodos del problema, y
+(ii) el número de reinicios del algoritmo Hill-Climbing.
 
 \subsection{Instancias elegidas}
+Para la experimentación se utilizaron las instancias oficiales proporcionadas por el ayudante en el proyecto, las cuales incluyen
+tanto los archivos Tipo 1 (información de nodos, tiempos y ventanas) como los archivos Tipo 2 (perfiles de usuarios, beneficios y
+tiempos máximos). Estas instancias permiten evaluar el desempeño del algoritmo en distintos escenarios, con diferentes distribuciones
+de beneficios, ventanas de tiempo y restricciones operacionales.
+
+El análisis respecto a la cantidad de nodos se realizó aplicando el algoritmo a todas las instancias disponibles con tamaños
+comprendidos entre 10 y 140 nodos, evaluando cómo la escala del problema afecta la factibilidad, el tiempo de ejecución y la
+calidad de las soluciones obtenidas. Cada instancia fue ejecutada 10 veces utilizando distintas semillas aleatorias, con el
+objetivo de capturar la variabilidad inherente a la naturaleza estocástica del método.
+
+Por otro lado, para estudiar el impacto de la cantidad de reinicios, se seleccionó una instancia representativa de tamaño
+intermedio dentro del conjunto entregado (instancia de 100 nodos). Sobre esta instancia se evaluaron
+configuraciones con 10, 50, 100, 500 y 1000 reinicios, manteniendo constante el resto de los parámetros. Este procedimiento permite
+aislar el efecto de los reinicios y analizar su influencia en la diversificación de la búsqueda, la convergencia hacia óptimos
+locales y el tiempo requerido por la ejecución.
 
 \subsection{Hardware utilizado}
+Los experimentos se ejecutaron en una máquina con las siguientes características:
+\begin{itemize}
+  \item \textbf{Procesador:} Intel(R) Core(TM) i5-9300H CPU @ 2.40GHz
+  \item \textbf{Memoria RAM:}  16 GB DDR4-2666 (1333 MHz) X 2 (32 GB totales)
+  \item \textbf{Sistema operativo:} Windows 11 Home 25H2
+  \item \textbf{Entorno de ejecución:} WSL Ubuntu 22.04.1 LTS
+  \item \textbf{Almacenamiento:}  Intel Optane 238GB SSD NVMe
+\end{itemize}
 
 \subsection{Parámetros y detalles importantes}
 \begin{itemize}
-  \item \textbf{Cantidad de Nodos}
-  \item \textbf{Cantidad de Usuarios}
-  \item \textbf{semilla}
-  \item \textbf{Cantidad de Restarts}
+  \item \textbf{Cantidad de Nodos:} Se estudió el efecto del tamaño del problema sobre: el tiempo de ejecución, la factibilidad de
+  las soluciones generadas, y el valor de la función de evaluación. Para ello se analizaron las instancias con 10, 20, 30, ..., 140
+  nodos, manteniendo constantes las demás características del problema.
+  Cada instancia se ejecutó 10 veces con diferentes semillas para observar la variabilidad del método debido a su componente estocástico.
+  El número de reinicios se mantuvo fijo en 10. Y se ocupo la instancia con la mayor cantidad de usuarios.
+  \item \textbf{Cantidad de Restarts:} Para estudiar el efecto de la diversificación del algoritmo, se utilizó una única instancia
+  con 100 nodos y se variaron los valores de reinicios a: 10, 50, 100, 500 y 1000. Cada instancia se ejecutó 10 veces con diferentes
+  semillas. Este
+  experimento permite evaluar cómo la cantidad de reinicios afecta: la capacidad de escapar de óptimos locales, la factibilidad del tour,
+  el tiempo total de ejecución, y la calidad final de la solución.
 \end{itemize}
 
 \section{Resultados}
