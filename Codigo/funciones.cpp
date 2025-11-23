@@ -210,11 +210,12 @@ int int_rand (int a, int b){
   return retorno;
 }
 
-void escribir_salida(solucion * mejor_solucion, usuario * usuario, ofstream & res){
+void escribir_salida(solucion * mejor_solucion, usuario * usuario, chrono::milliseconds duration, ofstream & res){
     res<<mejor_solucion->aptitud<<endl;
     res<<usuario->tiempo_max<<" "<<mejor_solucion->tiempo_servicio<<endl;
     for(int i=0;i<mejor_solucion->tour.size();i++) res<<mejor_solucion->tour[i]<<" ";
     res<<endl;
+    res<<duration.count()<<endl;
     return;
 }
 

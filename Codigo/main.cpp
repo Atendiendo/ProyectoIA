@@ -34,9 +34,12 @@ int main(int argc, char *argv[]) {
     bool optimo_local;
     int movimiento;
 
+    double tiempoEjecucion;
     //Iterar sobre usuarios
     for (int i = 0; i < cant_usuarios; i++) {
         if(debug) cout<<"USUARIO NUMERO: " << i << endl;
+        //Medir tiempo
+        auto start = std::chrono::high_resolution_clock::now();
         //Solucion inicial
         crear_solucion_aleatoria(&solucion_actual, &nodos_leidos, &usuarios_list[i]);
 
@@ -152,7 +155,9 @@ int main(int argc, char *argv[]) {
             if(debug) getchar();
         }
         if(debug) cout<<"-------------------------------------------------------------------------------------"<<endl;
-        escribir_salida(&mejor_solucion, &usuarios_list[i], res);
+        auto end = std::chrono::high_resolution_clock::now();
+        auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
+        escribir_salida(&mejor_solucion, &usuarios_list[i], duration, res);
         cout << "Mejor solucion usuario " << i << endl;
         cout << mejor_solucion << endl;
         cout << endl;

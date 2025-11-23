@@ -10,6 +10,8 @@
 #include <cmath>
 #include <cstdlib>
 
+#include <chrono>
+
 using namespace std;
 
 #endif
