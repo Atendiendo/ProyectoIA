@@ -4,9 +4,12 @@
 \usepackage[spanish]{babel}
 \usepackage{amsfonts}
 \usepackage{amsmath}
-\usepackage[dvips]{graphicx}
+\usepackage{graphicx}
 \usepackage{url}
 \usepackage[top=3cm,bottom=3cm,left=3.5cm,right=3.5cm,footskip=1.5cm,headheight=1.5cm,headsep=.5cm,textheight=3cm]{geometry}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows,automata,shapes.misc}
+\usepackage{float}
 
 
 \begin{document}
@@ -197,7 +200,7 @@ clientes, el algoritmo mejora progresivamente su rendimiento, alcanzando hasta u
 entrenamiento. Este enfoque representa un avance significativo en la aplicación de DRL a problemas de enrutamiento estocásticos,
 eliminando la necesidad de diseñar heurísticas manuales y adaptándose dinámicamente a la incertidumbre en la demanda.
 
-\subsection{Resultados obtenidos}
+\subsection{Resumen Estado del Arte}
 Si bien la revisión abarca una gama de problemas relacionados (PTP, OP, TOP), el análisis comparativo se orienta a identificar las
 técnicas más adecuadas para abordar el Enhanced Profitable Tour Problem (EPTP), el cual se caracteriza por la selección óptima de
 clientes, la maximización de la utilidad y, críticamente, la incorporación de restricciones operativas realistas como ventanas de tiempo.
@@ -322,7 +325,58 @@ combinatorio; su rol es definir el dominio para la verificación de la factibili
 (ventanas de tiempo) dentro de cada combinación binaria generada por $x_{ij}$ e $y_i$.
 
 \section{Representación}
-Representaci\'on de \textbf{soluciones} (arreglos, matrices, etc.). En caso de t\'ecnicas completas indicar variables y dominios. Incluir justificaci\'on y ejemplos para mayor claridad.
+Se ha seleccionado una representación de permutación de enteros para codificar las soluciones.
+En esta estructura, una solución se define como una secuencia ordenada de nodos, donde cada
+elemento corresponde a un identificador único de un nodo visitado y la posición en la lista indica el orden de visita.
+
+Como se definió en la sección anterior, el nodo inicial es fijo (nodo 1). Por consiguiente, la estructura asume implícitamente
+que el recorrido comienza en dicho nodo y que existe una arista de retorno desde el último elemento de la lista hacia el primero,
+cerrando así el ciclo. Aquellos nodos que no se encuentran en la lista se consideran no visitados en la solución actual.
+\subsection{Justificación de la Representación}
+\begin{itemize}
+  \item \textbf{Eficiencia y Reducción del Espacio de Búsqueda:} A diferencia de una matriz binaria de adyacencia, esta lista compacta
+  almacena solo la información relevante (nodos visitados y su secuencia), eliminando la redundancia de representar aristas
+  inexistentes o nodos no visitados.
+  \item \textbf{Relación Uno a Uno:} Existe una relación clara entre la representación y la solución física; cualquier permutación válida
+  de un subconjunto de nodos se traduce en un único tour.
+  \item \textbf{Flexibilidad de Representación:} La estructura es lo suficientemente flexible para representar la solución óptima global,
+  permitiendo soluciones de tamaño variable.
+  \item \textbf{Manipulación:} Facilita la implementación de operadores de búsqueda local (como swap, addition o 2-opt) al requerir simplemente
+  el cambio de índices en la secuencia.
+\end{itemize}
+
+\subsection{Ejemplo}
+A continuación, se presenta un esquema visual de una solución factible y su correspondiente codificación.
+
+\shorthandoff{>}
+\begin{figure}[H]
+  \centering
+  \begin{tikzpicture}[->, auto, node distance=1.8cm, thick]
+
+  \tikzstyle{every state}=[draw, text=black]
+
+  % nodos
+  \node[state] (1) at (90:2) {1};   % arriba
+  \node[state] (2) at (18:2) {2};
+  \node[state] (3) at (-54:2) {3};
+  \node[state] (4) at (-126:2) {4};
+  \node[state] (5) at (162:2) {5};
+
+  % aristas
+  \path (1) edge (2)
+        (2) edge (3)
+        (3) edge (4)
+        (4) edge (1);
+
+  \end{tikzpicture}
+  \caption{Representación gráfica de un tour que visita los nodos 1, 2, 3 y 4.}
+  \label{fig:ejemplo_tour}
+\end{figure}
+\shorthandon{>}
+
+Tal como se aprecia en la Figura \ref{fig:ejemplo_tour}, el tour recorre la secuencia de nodos visitados excluyendo al nodo 5.
+La representación en forma de lista para esta solución específica corresponde a: $[1,2,3,4]$ Esta lista indica que el recorrido
+inicia en 1, avanza secuencialmente hacia 2, 3 y 4, y finalmente retorna al nodo 1
 
 \section{Descripción del algoritmo}
 C\'omo fue implementada la soluci\'on. Interesa la implementaci\'on particular m\'as que el algoritmo gen\'erico, es decir, si se tiene que implementar SA, lo que se espera es que se explique en pseudoc\'odigo la estructura
