@@ -20,7 +20,7 @@ int main(int argc, char *argv[]) {
     resultado_lectura = leer_entradas(cant_nodos, instanciaNodos, cant_usuarios, instanciaUsuarios);
     //Archivo salida
     ofstream res;
-    res.open("sol_" + to_string(cant_nodos) + "_instancia_" + to_string(instanciaUsuarios) + ".txt");
+    res.open("ResultadosTarea1/sol_" + to_string(cant_nodos) + "_instancia_" + to_string(instanciaUsuarios) + "_" + to_string(semilla) + ".txt");
 
     nodos nodos_leidos;
     nodos_leidos = resultado_lectura.nodos_leidos;
@@ -36,6 +36,7 @@ int main(int argc, char *argv[]) {
 
     double tiempoEjecucion;
     //Iterar sobre usuarios
+    double tiempoPromedio = 0.0;
     for (int i = 0; i < cant_usuarios; i++) {
         if(debug) cout<<"USUARIO NUMERO: " << i << endl;
         //Medir tiempo
@@ -157,11 +158,14 @@ int main(int argc, char *argv[]) {
         if(debug) cout<<"-------------------------------------------------------------------------------------"<<endl;
         auto end = std::chrono::high_resolution_clock::now();
         auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
+        tiempoPromedio += duration.count();
         escribir_salida(&mejor_solucion, &usuarios_list[i], duration, res);
         cout << "Mejor solucion usuario " << i << endl;
         cout << mejor_solucion << endl;
         cout << endl;
     }
+    tiempoPromedio = tiempoPromedio / cant_usuarios;
+    res<<tiempoPromedio;
     res.close();
 
     
