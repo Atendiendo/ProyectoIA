@@ -5,8 +5,6 @@
 int main(int argc, char *argv[]) {
     int semilla, debug, Mr, iteracion;
     int cant_nodos, instanciaNodos, instanciaUsuarios, cant_usuarios;
-    //cout << "Ingresar cantidad de nodos, instancia, cantidad de usuarios, semilla, numero de restarts, debug separados por un espacio en blanco." << endl;
-    //cin >> cant_nodos >> instancia >> cant_usuarios >> semilla >> Mr >> debug;
 
     cant_nodos = atoi(argv[1]);
     instanciaNodos = atoi(argv[2]);
@@ -20,7 +18,7 @@ int main(int argc, char *argv[]) {
     resultado_lectura = leer_entradas(cant_nodos, instanciaNodos, cant_usuarios, instanciaUsuarios);
     //Archivo salida
     ofstream res;
-    res.open("ResultadosTarea1/sol_" + to_string(cant_nodos) + "_instancia_" + to_string(instanciaUsuarios) + "_" + to_string(semilla) + ".txt");
+    res.open("sol_" + to_string(cant_nodos) + "_instancia_" + to_string(instanciaUsuarios) + ".txt");
 
     nodos nodos_leidos;
     nodos_leidos = resultado_lectura.nodos_leidos;
@@ -34,13 +32,9 @@ int main(int argc, char *argv[]) {
     bool optimo_local;
     int movimiento;
 
-    double tiempoEjecucion;
     //Iterar sobre usuarios
-    double tiempoPromedio = 0.0;
     for (int i = 0; i < cant_usuarios; i++) {
         if(debug) cout<<"USUARIO NUMERO: " << i << endl;
-        //Medir tiempo
-        auto start = std::chrono::high_resolution_clock::now();
         //Solucion inicial
         crear_solucion_aleatoria(&solucion_actual, &nodos_leidos, &usuarios_list[i]);
 
@@ -56,7 +50,7 @@ int main(int argc, char *argv[]) {
             //time_t ini_it=time(NULL);
             mejor_candidata=solucion_actual;
 
-            //Si se sobrepasa tiempo maximo, eliminar nodos
+            //Si la solucion es infactible, eliminar nodos
             if (solucion_actual.factibilidad == 'I' && solucion_actual.tour.size() > 2) {
                 for(int current=1;current<solucion_actual.tour.size();current++){
                     if(debug) cout<<"\t\t\t\t  \t\t\t";
@@ -156,19 +150,12 @@ int main(int argc, char *argv[]) {
             if(debug) getchar();
         }
         if(debug) cout<<"-------------------------------------------------------------------------------------"<<endl;
-        auto end = std::chrono::high_resolution_clock::now();
-        auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
-        tiempoPromedio += duration.count();
-        escribir_salida(&mejor_solucion, &usuarios_list[i], duration, res);
+        escribir_salida(&mejor_solucion, &usuarios_list[i], res);
         cout << "Mejor solucion usuario " << i << endl;
         cout << mejor_solucion << endl;
         cout << endl;
     }
-    tiempoPromedio = tiempoPromedio / cant_usuarios;
-    res<<tiempoPromedio;
     res.close();
-
-    
 
     return 0;
 }

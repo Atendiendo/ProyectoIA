@@ -11,6 +11,7 @@
 \usetikzlibrary{positioning,arrows,automata,shapes.misc}
 \usepackage{float}
 \usepackage[linesnumbered,ruled,vlined]{algorithm2e}
+\usepackage{booktabs}
 
 
 \begin{document}
@@ -39,12 +40,47 @@ Bibliograf\'ia (5\%): & \underline{\hspace{2cm}}\\
 %---------------------------------------------------------------------------%
 
 \begin{abstract}
-Resumen del informe en no m\'as de 10 l\'ineas, donde se sintetice el problema que se trata, el acercamiento propuesto
-y sirva para que un lector no involucrado comprenda el objetivo del documento.
+Este informe aborda el \textit{Enhanced Profitable Tour Problem} (EPTP), un problema de optimización combinatoria que busca
+maximizar la rentabilidad de una ruta seleccionando un subconjunto de nodos bajo estrictas restricciones de ventanas de
+tiempo. Dada su complejidad NP-Hard, se propone una solución aproximada basada en una metaheurística de \textit{Hill-Climbing}
+con estrategia de reinicios múltiples. El documento detalla el modelo matemático, la implementación de operadores de vecindario
+y un análisis experimental sobre instancias de hasta 140 nodos. Los resultados validan la eficacia del enfoque, demostrando su
+capacidad para obtener soluciones factibles y competitivas en tiempos de ejecución reducidos, adecuados para aplicaciones logísticas reales.
 \end{abstract}
 
 \section{Introducción}
-Una explicaci\'on breve del contenido del informe, es decir, detalla: Prop\'osito, Estructura del Documento, Descripci\'on (muy breve) del Problema y Motivaci\'on e ideas fundamentales de la propuesta de soluci\'on. Incluye la descripci\'on del contenido del Informe secci\'on por secci\'on.
+En los últimos años han surgido diversas empresas y aplicaciones que se centran en definir la ruta más óptima (Reparto urbano,
+rutas turísticas, etc.) para maximizar la rentabilidad del negocio. Esta problemática de optimización es muy conocida y ha sido estudiada
+extensivamente.
+El problema mas clásico de enrutamiento es el Travelling Salesman Problem (TSP): el cual consiste en encontrar el camino más corto que
+visita todos los nodos de un conjunto (con sus respectivos arcos), comenzando y terminando en el mismo punto.
+
+El Enhanced Profitable Tour Problem (EPTP) es una generalización del
+TSP: no es necesario visitar todos los nodos, cada nodo tiene una valoración propia según el usuario
+y se busca maximizar el beneficio neto del recorrido teniendo en cuenta tanto las ganancias por visitar nodos como los arcos.
+
+Este documento se divide en nueve partes:
+\begin{itemize}
+  \item \textbf{Definición del problema:} Se explica con detalle en qué consiste el EPTP, cuáles son sus variables, restricciones y
+  objetivo(s). Además se presentan problemas relacionados y las variantes más conocidas.
+  \item \textbf{Estado del arte:} Se detallan los estudios previos relevantes, comparando métodos exactos, heurísticos,
+  metaheurísticos, hibridos (completos e incompletos) y técnicas emergentes aplicados a variantes cercanas.
+  \item \textbf{Modelo matemático:} Se describe el modelo matemático propuesto/analizado, incluida la notación y las ecuaciones
+  principales.
+  \item \textbf{Representación:} Se fundamenta la elección de una codificación basada en permutaciones de enteros para modelar las
+  rutas, justificando sus ventajas en términos de flexibilidad y eficiencia en el uso de memoria.
+  \item \textbf{Descripción del algoritmo:} Se detalla el funcionamiento de la metaheurística implementada (\textit{Hill-Climbing}
+  con reinicios), describiendo la lógica de los operadores de vecindario utilizados para la mejora local y la función de evaluación.
+  \item \textbf{Experimentos:} Se define la metodología experimental diseñada para validar la propuesta, especificando las instancias
+  de prueba, el entorno de hardware y los parámetros configurados para evaluar la escalabilidad y robustez del método.
+  \item \textbf{Resultados:} Se presentan y discuten los datos cuantitativos obtenidos, utilizando tablas y gráficos para analizar el
+  comportamiento del algoritmo respecto a la calidad de la solución, la factibilidad y los tiempos de ejecución.
+  \item \textbf{Conclusiones:} Se exponen las conclusiones principales extraídas del análisis experimental y se sugieren líneas futuras
+  de trabajo.
+\end{itemize}
+
+El propósito central de este informe es validar la eficacia de la estrategia de resolución propuesta, demostrando mediante evidencia
+experimental su capacidad para gestionar la complejidad combinatoria del EPTP y generar soluciones factibles en tiempos competitivos.
 
 \section{Definición del Problema}
 Sea un grafo dirigido $G = (V, A)$, donde $V$ representa un conjunto de $n$ nodos y $A$ un conjunto de $m$ arcos. Tanto los
@@ -396,7 +432,8 @@ La estructura general y el flujo de control del procedimiento propuesto se detal
 
 \subsection{Generación de solución inicial}
 La solución inicial se genera construyendo una permutación aleatoria que contiene aproximadamente la mitad de los nodos disponibles.
-Este mismo procedimiento se utiliza cada vez que ocurre un reinicio.
+Este mismo procedimiento se utiliza cada vez que ocurre un reinicio. La implementacion se detalla en
+Algoritmo \ref{alg:crear_solucion_aleatoria}.
 
 La elección de generar únicamente la mitad del número total de nodos es por razones de factibilidad.
 En etapas iniciales se intentó construir soluciones que incluyeran todos los nodos, pero estas solían resultar infactibles y
@@ -421,9 +458,10 @@ de referencia. Los operadores considerados son:
   Algoritmo \ref{alg:addition}.
   
   \item \textbf{Delete}: elimina un nodo del tour, generalmente para corregir infactibilidades asociadas al tiempo máximo.
-  \item \textbf{Swap}: intercambia dos nodos dentro del tour, promoviendo intensificación.
-  \item \textbf{Exchange}: intercambia un nodo dentro del tour con uno fuera del tour.
-  \item \textbf{2-opt}: revierte un segmento del tour, reduciendo potencialmente el costo del recorrido.
+  Algoritmo \ref{alg:eliminacion}
+  \item \textbf{Swap}: intercambia dos nodos dentro del tour, promoviendo intensificación. Algoritmo \ref{alg:swap}
+  \item \textbf{Exchange}: intercambia un nodo dentro del tour con uno fuera del tour. Algoritmo \ref{alg:exchange}
+  \item \textbf{2-opt}: revierte un segmento del tour, reduciendo potencialmente el costo del recorrido. Algoritmo \ref{alg:opt_2}
 \end{itemize}
 
 Ninguno de estos movimientos emplea parámetros adicionales específicos; la búsqueda se guía únicamente por la solución
@@ -449,9 +487,7 @@ objetivo de capturar la variabilidad inherente a la naturaleza estocástica del 
 
 Por otro lado, para estudiar el impacto de la cantidad de reinicios, se seleccionó una instancia representativa de tamaño
 intermedio dentro del conjunto entregado (instancia de 100 nodos). Sobre esta instancia se evaluaron
-configuraciones con 10, 50, 100, 500 y 1000 reinicios, manteniendo constante el resto de los parámetros. Este procedimiento permite
-aislar el efecto de los reinicios y analizar su influencia en la diversificación de la búsqueda, la convergencia hacia óptimos
-locales y el tiempo requerido por la ejecución.
+configuraciones con 10, 50, 100, 500 y 1000 reinicios, manteniendo constante el resto de los parámetros.
 
 \subsection{Hardware utilizado}
 Los experimentos se ejecutaron en una máquina con las siguientes características:
@@ -472,17 +508,234 @@ Los experimentos se ejecutaron en una máquina con las siguientes característic
   El número de reinicios se mantuvo fijo en 10. Y se ocupo la instancia con la mayor cantidad de usuarios.
   \item \textbf{Cantidad de Restarts:} Para estudiar el efecto de la diversificación del algoritmo, se utilizó una única instancia
   con 100 nodos y se variaron los valores de reinicios a: 10, 50, 100, 500 y 1000. Cada instancia se ejecutó 10 veces con diferentes
-  semillas. Este
+  semillas, con la mayor cantidad de usuarios de la instancia (45). Este
   experimento permite evaluar cómo la cantidad de reinicios afecta: la capacidad de escapar de óptimos locales, la factibilidad del tour,
   el tiempo total de ejecución, y la calidad final de la solución.
 \end{itemize}
 
 \section{Resultados}
-Qu\'e fue lo que se logr\'o con la experimentaci\'on, incluir tablas y gr\'aficos (lo m\'as explicativos posible).
-Los resultados deben ser comentados y justificados en detalle en esta secci\'on.
+
+\subsection{Experimento 1}
+El primer experimento tuvo como objetivo estudiar cómo varía el desempeño del algoritmo en función de la cantidad de nodos
+presentes en la instancia. Para ello, se ejecutó el método sobre instancias que van desde 10 hasta 140 nodos. Cada instancia fue
+evaluada 10 veces utilizando distintas semillas, y se mantuvo fija la cantidad de reinicios en 10.
+
+Los resultados se resumen en el Cuadro \ref{tab:resultados_tarea1}, donde se presenta el número promedio de soluciones factibles e
+infactibles encontradas a
+lo largo de las ejecuciones. El análisis de estos datos permite identificar varios patrones relevantes.
+\begin{table}[htbp]
+    \centering
+    \caption{Resultados del experimento 1}
+    \label{tab:resultados_tarea1}
+    \begin{tabular}{crrrc}
+        \toprule
+        \textbf{Nodos} & \textbf{Factibles} & \textbf{No Fact.} & \textbf{Tiempo prom. ($\mu$s)} & \textbf{Aptitud prom.} \\
+        \midrule
+        10  & 6,8  & 0,2 & 206,60   & 87,3  \\
+        20  & 10,7 & 0,3 & 713,70   & 118,6 \\
+        30  & 14,3 & 0,7 & 1637,85  & 136,4 \\
+        50  & 26,2 & 0,8 & 5289,16  & 162,1 \\
+        70  & 17,5 & 0,5 & 11451,89 & 182,5 \\
+        80  & 41,2 & 0,8 & 14594,39 & 183,4 \\
+        100 & 44,2 & 0,8 & 22942,80 & 186,6 \\
+        110 & 51,8 & 0,2 & 28914,60 & 188,9 \\
+        120 & 61,7 & 0,3 & 36042,87 & 192,5 \\
+        140 & 71,4 & 0,6 & 53051,19 & 203,0 \\
+        \bottomrule
+    \end{tabular}
+\end{table}
+
+A partir de los resultados mostrados en el Cuadro 2, se observa que el algoritmo logra,
+en general, una cantidad considerable de soluciones factibles en prácticamente todas las instancias evaluadas. Incluso en los
+casos de mayor tamaño, el número de soluciones válidas aumenta de forma consistente, mientras que la cantidad de soluciones no
+factibles se mantiene siempre muy baja (entre 0.2 y 0.8 en promedio).
+
+\begin{table}[h!]
+\label{tab:resultados_factibilidad}
+\centering
+\begin{tabular}{c c c}
+\hline
+\textbf{Cantidad de nodos} & \textbf{Factibles} & \textbf{No factibles} \\
+\hline
+10  & 6.8  & 0.2 \\
+20  & 10.7 & 0.3 \\
+30  & 14.3 & 0.7 \\
+50  & 26.2 & 0.8 \\
+70  & 17.5 & 0.5 \\
+80  & 41.2 & 0.8 \\
+100 & 44.2 & 0.8 \\
+110 & 51.8 & 0.2 \\
+120 & 61.7 & 0.3 \\
+140 & 71.4 & 0.6 \\
+\hline
+\end{tabular}
+\caption{Resultados de factibilidad por cantidad de nodos.}
+\end{table}
+
+La Figura \ref{fig:GraficoavgaptVSnodos} muestra la relación entre la cantidad de nodos de la instancia y la aptitud promedio obtenida por el algoritmo.
+Se observa una tendencia claramente creciente: a medida que aumenta el número de nodos disponibles, el valor promedio de
+aptitud también se incrementa de forma sostenida.
+
+Este comportamiento es coherente con la naturaleza del EPTP, ya que un mayor número de nodos incrementa el potencial máximo
+de recompensa disponible en el problema. Por tanto, el algoritmo dispone de más oportunidades para construir rutas que acumulen
+un mayor puntaje. Además, la curva presenta un crecimiento
+particularmente pronunciado entre 10 y 70 nodos, estabilizándose luego en un incremento más moderado, lo cual sugiere que el algoritmo
+sigue aprovechando nodos adicionales, aunque con un beneficio marginal decreciente.
+
+Por otra parte, es crucial analizar el costo computacional asociado a obtener estas soluciones. La Figura
+\ref{fig:GraficoavgtimeVSnodos} expone la evolución del tiempo promedio de ejecución (medido en microsegundos)
+conforme aumenta la cantidad de nodos.
+
+\begin{figure}[H]
+    \centering
+    \begin{minipage}[t]{0.5\textwidth}
+      \includegraphics[width=\textwidth]{Graficos/avgaptVSnodos.png}
+      \caption{Aptitud promedio vs nodos.}
+      \label{fig:GraficoavgaptVSnodos}
+    \end{minipage}%
+    \begin{minipage}[t]{0.5\textwidth}
+      \includegraphics[width=\textwidth]{Graficos/avgtimeVSnodos.png}
+      \caption{Aptitud promedio vs nodos.}
+      \label{fig:GraficoavgtimeVSnodos}
+    \end{minipage}%
+\end{figure}
+
+Al observar la gráfica, se evidencia que el tiempo de ejecución no crece de manera lineal, sino que sigue una tendencia que
+aparenta ser polinomial (posiblemente cuadrática). En las instancias pequeñas (de 10 a 30 nodos), el tiempo es prácticamente
+despreciable y la curva se mantiene plana. Sin embargo, a partir de los 50 nodos, la pendiente comienza a pronunciarse,
+acelerándose notablemente en el intervalo de 100 a 140 nodos.
+
+Este comportamiento es esperable y se justifica por el aumento
+en la complejidad del espacio de búsqueda. Al incrementar el número de nodos, aumenta factorialmente la cantidad de posibles
+permutaciones de rutas y cuadráticamente la matriz de distancias, lo que obliga al algoritmo a realizar un mayor número de
+operaciones para evaluar la factibilidad y calcular la función objetivo en cada uno de los 10 reinicios configurados.
+
+Sin embargo, es fundamental destacar la magnitud de los valores temporales. A pesar de la forma ascendente de la curva,
+el tiempo máximo registrado para la instancia más compleja (140 nodos) es de aproximadamente 53000 $\mu$s, lo que equivale
+a 0.053 segundos. Esto indica que, aunque el algoritmo requiere más tiempo para instancias grandes, sigue siendo extremadamente
+eficiente en términos absolutos, resolviendo el problema en una fracción de segundo, lo cual es un indicador muy positivo
+para su viabilidad en aplicaciones de tiempo real.
+
+\subsection{Experimento 2}
+El segundo experimento tuvo como objetivo estudiar cómo varía el desempeño del algoritmo en función de la cantidad de reinicios
+(Restarts) configurados. Para ello, se utilizó una instancia de tamaño fijo (100 nodos) evaluada sobre 45 usuarios, variando
+la cantidad de reinicios en el conjunto $\{10, 50, 100, 500, 1000\}$.
+
+Los resultados se resumen en el Cuadro \ref{tab:resultados_tarea2}, donde se presenta el promedio de las métricas clave obtenidas
+tras las ejecuciones. El análisis de estos datos permite comprender el impacto de la intensificación y diversificación en la búsqueda.
+
+\begin{table}[htbp]
+    \centering
+    \caption{Resultados del experimento 2}
+    \label{tab:resultados_tarea2}
+    \begin{tabular}{crrrc}
+        \toprule
+        \textbf{Restarts} & \textbf{Factibles} & \textbf{No Fact.} & \textbf{Tiempo prom. ($\mu$s)} & \textbf{Aptitud prom.} \\
+        \midrule
+        10   & 44,2 & 0,8 & 2,19E+04 & 186,6 \\
+        50   & 44,5 & 0,5 & 1,10E+05 & 208,3 \\
+        100  & 44,4 & 0,6 & 2,20E+05 & 216,9 \\
+        500  & 44,1 & 0,9 & 1,09E+06 & 231,3 \\
+        1000 & 44,5 & 0,5 & 2,21E+06 & 235,8 \\
+        \bottomrule
+    \end{tabular}
+\end{table}
+
+A partir de los resultados mostrados en el Cuadro \ref{tab:resultados_restarts}, se destaca una notable estabilidad en la tasa
+de soluciones factibles encontradas. Independientemente de si el algoritmo se reinicia 10 o 1000 veces, la proporción de soluciones que
+respetan todas las restricciones se mantiene constante y alta, promediando alrededor de 44.5 usuarios con solución factible de un total de 45.
+
+Esto sugiere que la capacidad del algoritmo para encontrar soluciones válidas no depende de la "fuerza bruta" de los reinicios, sino de
+la robustez de los operadores de reparación (específicamente el operador Delete) y la función de evaluación diseñados.
+
+\begin{table}[htbp]
+    \centering
+    \caption{Comparación de resultados según cantidad de Restarts}
+    \label{tab:resultados_restarts}
+    \begin{tabular}{ccc}
+        \toprule
+        \textbf{Restarts} & \textbf{Factibles} & \textbf{No Factibles} \\
+        \midrule
+        10   & 44,2 & 0,8 \\
+        50   & 44,5 & 0,5 \\
+        100  & 44,4 & 0,6 \\
+        500  & 44,1 & 0,9 \\
+        1000 & 44,5 & 0,5 \\
+        \bottomrule
+    \end{tabular}
+\end{table}
+
+La Figura \ref{fig:GraficoavgaptVSrestarts} ilustra la relación entre la cantidad de reinicios y la aptitud promedio obtenida.
+Se observa un comportamiento de \textbf{rendimientos decrecientes}. Existe un incremento notable en la calidad de la solución al
+pasar de 10 a 50 y 100 reinicios (la curva tiene una pendiente pronunciada inicialmente), lo que indica que los primeros reinicios
+son críticos para escapar de óptimos locales pobres.
+
+Sin embargo, a medida que la cantidad de reinicios aumenta hacia 500 y 1000, la curva se suaviza. Aunque la aptitud sigue
+mejorando (alcanzando su máximo de 235,8 con 1000 reinicios), la ganancia marginal por cada reinicio adicional es menor. Esto
+indica que el algoritmo comienza a saturar su capacidad de búsqueda en el espacio de soluciones disponible para esta instancia.
+
+Por otra parte, es crucial analizar el costo computacional. La Figura \ref{fig:GraficoavgtimeVSrestarts} expone
+la evolución del tiempo promedio de ejecución.
+
+\begin{figure}[H]
+    \centering
+    \begin{minipage}[t]{0.5\textwidth}
+      \includegraphics[width=\textwidth]{Graficos/avgaptVSrestarts.png}
+      \caption{Aptitud promedio vs nodos.}
+      \label{fig:GraficoavgaptVSrestarts}
+    \end{minipage}%
+    \begin{minipage}[t]{0.5\textwidth}
+      \includegraphics[width=\textwidth]{Graficos/avgtimeVSrestarts.png}
+      \caption{Aptitud promedio vs nodos.}
+      \label{fig:GraficoavgtimeVSrestarts}
+    \end{minipage}%
+\end{figure}
+
+Al observar la gráfica de tiempos, se confirma un crecimiento estrictamente \textbf{lineal}. La gráfica muestra una recta ascendente
+donde el tiempo es directamente proporcional al número de reinicios. Esto es evidente al comparar los puntos finales: al duplicar
+los reinicios de 500 a 1000, el tiempo también se duplica (pasando de $\approx 1.1 \times 10^6$ a $\approx 2.2 \times 10^6 \mu s$).
+Los valores bajos (10 a 100) parecen planos visualmente solo debido a la magnitud de la escala vertical, pero siguen la misma proporción
+lineal.
+
+Este comportamiento lineal, contrastado con la mejora asintótica de la aptitud, plantea un compromiso (\textit{trade-off}).
+Mientras que el costo temporal crece indefinidamente de forma lineal, la calidad de la solución tiende a estancarse. Por tanto,
+una configuración intermedia (entre 100 y 500 reinicios) parece ofrecer el mejor balance, maximizando la calidad de la solución
+sin incurrir en costos computacionales excesivos que aportan beneficios marginales mínimos.
 
 \section{Conclusiones}
-Conclusiones RELEVANTES del estudio realizado. Incluir conclusiones acerca de la adecuaci\'on de la propuesta de soluci\'on al problema que se busca resolver. Listar y analizar ventajas y desventajas de la propuesta en base a los resultados obtenidos y comportamiento de la propuesta en diferentes escenarios (problemas/instancias/par\'ametros). Incluir trabajo futuro en base a las conclusiones.
+El presente estudio abordó el Enhanced Profitable Tour Problem (EPTP), un desafío de optimización combinatoria de alta complejidad
+que modela situaciones críticas en la logística moderna y la planificación de rutas turísticas. La naturaleza NP-Hard del problema,
+sumada a restricciones operativas estrictas como ventanas de tiempo y limitaciones de recursos, hace inviable el uso de métodos exactos
+para instancias de tamaño realista, validando la necesidad de enfoques aproximados como el desarrollado en este informe.
+
+
+La propuesta de solución se fundamentó en una metaheurística de búsqueda local tipo Hill-Climbing con estrategia de reinicios
+múltiples (\textit{Restarts}). Esta elección demostró ser adecuada para el problema, logrando un equilibrio efectivo entre la
+intensificación (explotación de vecindarios mediante operadores de \textit{Swap}, \textit{Addition} y \textit{2-opt}) y la
+diversificación (exploración de nuevas áreas del espacio de búsqueda mediante reinicios aleatorios).
+
+El análisis experimental permitió validar la robustez y escalabilidad del algoritmo. Respecto al **Experimento 1**, se concluye
+que el método es altamente eficiente para instancias de hasta 140 nodos. Si bien el tiempo de ejecución exhibe un crecimiento
+polinomial conforme aumenta el tamaño del problema, los valores absolutos se mantienen en el orden de fracciones de segundo,
+lo cual confirma la viabilidad de la herramienta para aplicaciones en tiempo real. Asimismo, la alta tasa de factibilidad observada
+sugiere que el mecanismo de penalización y los operadores de reparación implementados son efectivos para manejar las restricciones
+de ventanas de tiempo.
+
+En cuanto al **Experimento 2**, el estudio de los reinicios reveló un comportamiento de rendimientos decrecientes. Se demostró
+que existe una relación lineal entre el número de reinicios y el tiempo de cómputo, mientras que la mejora en la calidad de la
+solución (aptitud) se comporta de manera asintótica. Esto permite concluir que maximizar indiscriminadamente los reinicios no
+es una estrategia eficiente; existe un punto de equilibrio (identificado en el rango de 100 a 500 reinicios para las instancias
+probadas) donde se maximiza la relación costo-beneficio. Superar este umbral conlleva un costo computacional alto con ganancias
+marginales en la función objetivo.
+
+Entre las ventajas de la propuesta destacan su simplicidad de implementación, su bajo consumo de recursos computacionales y su
+capacidad para generar soluciones factibles de manera consistente. Sin embargo, como desventaja inherente al método de búsqueda local,
+existe el riesgo de estancamiento en óptimos locales, el cual, aunque mitigado por los reinicios, no se elimina por completo.
+
+Como trabajo futuro, se sugiere la exploración de metaheurísticas poblacionales, como Algoritmos Genéticos o Colonias de Hormigas,
+que podrían ofrecer mecanismos de diversificación más sofisticados que el reinicio aleatorio. Asimismo, sería pertinente extender el
+modelo para abordar variantes estocásticas del problema, donde los tiempos de viaje o los beneficios sean variables aleatorias,
+acercando aún más la solución a la incertidumbre de los entornos reales.
 
 \bibliographystyle{plain}
 \bibliography{Referencias}
@@ -616,6 +869,100 @@ $nodo \gets S.no\_visitados[k]$\;
 }{
     $S_{cand} \gets S$\;
 }
+\end{algorithm}
+
+\begin{algorithm}
+\caption{Operador de Eliminación}
+\label{alg:eliminacion}
+\SetKwInOut{Input}{Entrada}
+\SetKwInOut{Output}{Salida}
+
+\Input{Solución actual $S$, índice $k$, Datos $N, U$}
+\Output{Solución candidata $S_{cand}$}
+
+$S_{cand} \gets S$\;
+
+\tcp{El nodo inicial (depósito) es inmutable}
+\If{$k \neq 0$}{
+    $u \gets S_{cand}.tour[k]$\;
+    Eliminar elemento en posición $k$ de $S_{cand}.tour$\;
+    Agregar $u$ a $S_{cand}.no\_visitados$\;
+}
+
+FuncionEvaluacion($S_{cand}, N, U$)\;
+\Return $S_{cand}$\;
+\end{algorithm}
+
+\begin{algorithm}
+\caption{Operador Swap (Best Improvement)}
+\label{alg:swap}
+\SetKwInOut{Input}{Entrada}
+\SetKwInOut{Output}{Salida}
+
+\Input{Solución actual $S$, índice $k$, Datos $N, U$}
+\Output{Solución candidata $S_{cand}$}
+
+$S_{best} \gets S$\;
+
+\For{$i \gets 1$ \KwTo $|S.tour| - 1$}{
+    \If{$i \neq k$}{
+        $S' \gets S$\;
+        Intercambiar $S'.tour[k]$ con $S'.tour[i]$\;
+        FuncionEvaluacion($S', N, U$)\;
+        
+        \If{$S'.aptitud > S_{best}.aptitud$}{
+            $S_{best} \gets S'$\;
+        }
+    }
+}
+
+$S_{cand} \gets S_{best}$\;
+\end{algorithm}
+
+\begin{algorithm}
+\caption{Operador Exchange (Best Improvement)}
+\label{alg:exchange}
+\SetKwInOut{Input}{Entrada}
+\SetKwInOut{Output}{Salida}
+
+\Input{Solución actual $S$, índice no visitado $k$, Datos $N, U$}
+\Output{Solución candidata $S_{cand}$}
+
+$S_{best} \gets S$\;
+
+\For{$i \gets 1$ \KwTo $|S.tour| - 1$}{
+    $S' \gets S$\;
+    \tcp{Intercambio entre lista de no visitados y tour}
+    Intercambiar $S'.no\_visitados[k]$ con $S'.tour[i]$\;
+    FuncionEvaluacion($S', N, U$)\;
+    
+    \If{$S'.aptitud > S_{best}.aptitud$}{
+        $S_{best} \gets S'$\;
+    }
+}
+
+$S_{cand} \gets S_{best}$\;
+\end{algorithm}
+
+\begin{algorithm}
+\caption{Movimiento 2-Opt (Intercambio Adyacente)}
+\label{alg:opt_2}
+\SetKwInOut{Input}{Entrada}
+\SetKwInOut{Output}{Salida}
+
+\Input{Solución $S$, posiciones $p_1, p_2$, Datos $N, U$}
+\Output{Solución candidata $S_{cand}$}
+
+$S_{cand} \gets S$\;
+
+\tcp{Proteger el depósito (0) y ajustar índice circular}
+\If{$p_1 \neq 0 \land p_2 \neq 0$}{
+    $p_2 \gets p_2 \pmod{|S.tour|}$\;
+    Intercambiar $S_{cand}.tour[p_1]$ con $S_{cand}.tour[p_2]$\;
+}
+
+FuncionEvaluacion($S_{cand}, N, U$)\;
+\Return $S_{cand}$\;
 \end{algorithm}
 
 \begin{algorithm}
